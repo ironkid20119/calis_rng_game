@@ -502,10 +502,6 @@
         else if (absBaseValue < 1e100) rank = 'what.';
         else rank = 'FINALE';
 
-        // NOW apply variants to displayValue (after rank is determined)
-        displayValue = displayValue * variantMultiplier;
-        const absDisplayValue = Math.abs(displayValue);
-
         let dispValue;
         if (typeof displayValue === 'number') {
           if (isReverted) {
@@ -522,8 +518,30 @@
             dispValue = displayValue.toFixed(2);
           }
         } else {
+          // Keep text values as-is (for ranks like NOTHINGNESS, Imaginary, etc.)
           dispValue = displayValue;
         }
+
+        // Apply variant multiplier only to numeric display values (skip text-based special ranks)
+        if (typeof displayValue !== 'string' && variantMultiplier !== 1) {
+          displayValue = displayValue * variantMultiplier;
+          const absDisplayValue = Math.abs(displayValue);
+          
+          // Recalculate dispValue after variants
+          if (isReverted) {
+            const exponent = Math.floor(Math.log10(Math.abs(displayValue)));
+            const mantissa = Math.abs(displayValue) / Math.pow(10, exponent);
+            dispValue = `${mantissa.toFixed(2)}e${exponent}`;
+          } else if (Math.abs(displayValue) >= 1e12) {
+            dispValue = displayValue.toExponential(4);
+          } else if (Math.abs(displayValue) >= 1000) {
+            dispValue = displayValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+          } else {
+            dispValue = displayValue.toFixed(2);
+          }
+        }
+        
+        const absDisplayValue = typeof displayValue === 'number' ? Math.abs(displayValue) : 0;
 
         let result = '';
         let invVariants = '';
