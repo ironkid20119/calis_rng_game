@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>calis rng</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Balthazar:wght@400;700&display=swap');
+
+      body {
+        font-family: 'Balthazar', serif;
+        margin: 0;
+        padding: 0;
+        background: #6a0dad;
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .game-container {
+        background: #2c2c2c;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        min-width: 350px;
+        max-width: 800px;
+      }
+
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #c71585;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+        font-family: 'Balthazar', serif;
+        font-weight: 700;
+      }
+
+      button:disabled {
+        background-color: #555;
+        cursor: not-allowed;
+      }
+
+      button:hover:not(:disabled) {
+        background-color: #e754bb;
+      }
+
+      #results {
+        margin-top: 20px;
+        white-space: pre-line;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 5px;
+        min-height: 100px;
+        font-family: 'Balthazar', serif;
+      }
+
+      .bold {
+        font-weight: 700;
+      }
+
+      .roll-line {
+        margin: 5px 0;
+      }
+
+      .rank-button {
+        background: none;
+        border: 2px solid #28a745;
+        color: inherit;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 3px;
+        font-family: 'Balthazar', serif;
+        transition: all 0.2s;
+        display: inline;
+      }
+
+      .rank-button:hover {
+        background-color: rgba(40, 167, 69, 0.2);
+        border-color: #34d058;
+      }
+
+      .rank-button.accepted {
+        opacity: 0.3;
+        cursor: default;
+        border-color: #555;
+      }
+
+      .rank-button.accepted:hover {
+        background: none;
+        border-color: #555;
+      }
+
+      .inventory-section {
+        margin-top: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+      }
+
+      .inventory-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .inventory-slot {
+        background: rgba(0, 0, 0, 0.3);
+        border: 2px solid #555;
+        border-radius: 5px;
+        padding: 10px;
+        min-height: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .inventory-slot:hover {
+        background: rgba(0, 0, 0, 0.5);
+        border-color: #888;
+      }
+
+      .inventory-slot.empty {
+        cursor: default;
+        opacity: 0.5;
+      }
+
+      .inventory-slot.empty:hover {
+        background: rgba(0, 0, 0, 0.3);
+        border-color: #555;
+      }
+
+      .slot-variants {
+        font-size: 10px;
+        margin-bottom: 3px;
+        color: #ffd700;
+      }
+
+      .slot-value {
+        font-weight: 700;
+        margin-bottom: 3px;
+      }
+
+      .slot-rank {
+        font-size: 11px;
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game-container">
+      <h1>calis rng game</h1>
+      <button id="rollOnceBtn">Roll Once</button>
+      <button id="rollMultipleBtn">Roll 15 Times</button>
+
+      <div id="results"></div>
+
+      <div class="inventory-section">
+        <h2>Inventory (25 slots)</h2>
+        <div class="inventory-grid" id="inventoryGrid"></div>
+      </div>
+    </div>
+
+    <script>
+      const resultsDiv = document.getElementById('results');
+      const rollOnceBtn = document.getElementById('rollOnceBtn');
+      const rollMultipleBtn = document.getElementById('rollMultipleBtn');
+      const inventoryGrid = document.getElementById('inventoryGrid');
+      let isCooldown = false;
+      let multiRolls = [];
+      let inventory = [];
+      const MAX_SLOTS = 25;
+      let lastClickTime = {};
+
+      // Load inventory from localStorage
+      function loadInventory() {
+        const saved = localStorage.getItem('calisRngInventory');
+        if (saved) {
+          try {
+            inventory = JSON.parse(saved);
+          } catch (e) {
+            inventory = [];
+          }
+        } else {
+          inventory = [];
+        }
+        renderInventory();
+      }
+
+      // Save inventory to localStorage
+      function saveInventory() {
+        localStorage.setItem('calisRngInventory', JSON.stringify(inventory));
+        renderInventory();
+      }
+
+      // Render inventory grid
+      function renderInventory() {
+        inventoryGrid.innerHTML = '';
+        for (let i = 0; i < MAX_SLOTS; i++) {
+          const slot = document.createElement('div');
+          slot.className = 'inventory-slot';
+          
+          if (inventory[i]) {
+            const item = inventory[i];
+            slot.className = 'inventory-slot';
+            
+            if (item.variants) {
+              const varDiv = document.createElement('div');
+              varDiv.className = 'slot-variants';
+              varDiv.textContent = item.variants;
+              slot.appendChild(varDiv);
+            }
+            
+            const valueDiv = document.createElement('div');
+            valueDiv.className = 'slot-value';
+            valueDiv.style.color = item.color;
+            valueDiv.textContent = item.displayValue;
+            slot.appendChild(valueDiv);
+            
+            const rankDiv = document.createElement('div');
+            rankDiv.className = 'slot-rank';
+            rankDiv.textContent = item.rank;
+            slot.appendChild(rankDiv);
+            
+            slot.onclick = () => deleteItem(i);
+          } else {
+            slot.className = 'inventory-slot empty';
+            slot.textContent = 'Empty';
+          }
+          
+          inventoryGrid.appendChild(slot);
+        }
+      }
+
+      // Delete item on double click
+      function deleteItem(index) {
+        const now = Date.now();
+        const key = `slot_${index}`;
+        
+        if (lastClickTime[key] && now - lastClickTime[key] < 1000) {
+          // Double click detected
+          inventory.splice(index, 1);
+          saveInventory();
+          lastClickTime[key] = 0;
+        } else {
+          lastClickTime[key] = now;
+        }
+      }
+
+      // Add to inventory
+      function addToInventory(item, buttonId) {
+        if (!item) return;
+        if (inventory.length >= MAX_SLOTS) {
+          alert('Inventory full! Delete items to make space.');
+          return;
+        }
+        
+        inventory.push(item);
+        saveInventory();
+        
+        // Mark button as accepted
+        const btn = document.getElementById(buttonId);
+        if (btn) {
+          btn.classList.add('accepted');
+          btn.onclick = null;
+        }
+      }
+
+      // Accept from roll
+      function acceptRoll(index) {
+        addToInventory(multiRolls[index], `rank-btn-${index}`);
+      }
+
+      // Make acceptRoll available globally
+      window.acceptRoll = acceptRoll;
+
+      function setCooldown(duration) {
+        if (isCooldown) return;
+        isCooldown = true;
+        rollOnceBtn.disabled = true;
+        rollMultipleBtn.disabled = true;
+        let remaining = duration / 1000;
+        const originalText1 = rollOnceBtn.textContent;
+        const originalText2 = rollMultipleBtn.textContent;
+
+        const interval = setInterval(() => {
+          rollOnceBtn.textContent = `Cooldown: ${remaining.toFixed(1)}s`;
+          rollMultipleBtn.textContent = `Cooldown: ${remaining.toFixed(1)}s`;
+          remaining -= 0.1;
+          if (remaining <= 0) {
+            clearInterval(interval);
+            rollOnceBtn.disabled = false;
+            rollMultipleBtn.disabled = false;
+            rollOnceBtn.textContent = originalText1;
+            rollMultipleBtn.textContent = originalText2;
+            isCooldown = false;
+          }
+        }, 100);
+      }
+
+      function getColor(value) {
+        if (value < 100000) return 'white';
+        if (value < 10000000) return 'gold';
+        if (value < 1000000000) return 'cyan';
+        if (value < 1000000000000) return 'purple';
+        if (value < 1000000000000000) return 'green';
+        return 'red';
+      }
+
+      function rollOnce() {
+        let isSpecial = false;
+        let auraCooldown = false;
+        let isNegative = false;
+        let isReverted = false;
+
+        // Ultra rare 1/75k
+        if (Math.random() < 1 / 75000) {
+          isSpecial = true;
+          auraCooldown = true;
+          const invData = {
+            variants: '',
+            displayValue: '1einf',
+            rank: 'In im table ?!?!?',
+            color: 'white'
+          };
+          return { result: '<span class="bold">You rolled a/an RANKBUTTON (1einf)!</span>', cooldown: 2500, inventoryData: invData };
+        }
+
+        // Ultra rare unknown 1/1234567 - check FIRST
+        if (Math.random() < 1 / 1234567) {
+          isSpecial = true;
+          const invData = {
+            variants: '',
+            displayValue: '???',
+            rank: '???UNKNOWN???',
+            color: 'white'
+          };
+          return { result: '<span class="bold">You rolled a/an RANKBUTTON (???)!</span>', cooldown: 2500, inventoryData: invData };
+        }
+
+        // Leaflet 1/2763 - can replace anything
+        if (Math.random() < 1 / 2763) {
+          isSpecial = true;
+          const invData = {
+            variants: '',
+            displayValue: '2,763.00',
+            rank: 'leaflet',
+            color: 'lightgreen'
+          };
+          return { result: '<span class="bold" style="color: lightgreen;">You rolled a/an RANKBUTTON (2,763.00)!</span>', cooldown: 2763, inventoryData: invData };
+        }
+
+        let base = Math.random();
+        let skewed;
+        if (base < 0.7) skewed = 1 + Math.random() * 9;
+        else if (base < 0.9) skewed = 10 + Math.random() * 40;
+        else if (base < 0.99) skewed = 50 + Math.random() * 450;
+        else skewed = 500 + Math.random() * 9500;
+
+        skewed = Math.max(1, skewed);
+        if (Math.random() < 1 / 1000) skewed = -1;
+
+        // NEGATIVE chance
+        if (skewed > 1 && Math.random() < 0.075) {
+          skewed = -skewed;
+          isNegative = true;
+        }
+
+        // REVERTED chance
+        if (Math.random() < 1 / 75 && skewed !== 0 && skewed !== -1) {
+          const originalValue = skewed;
+          skewed = 1 / skewed;
+          isReverted = true;
+          var revertedOriginal = originalValue;
+        }
+
+        // Store the base value for rank determination (BEFORE variants)
+        const baseValue = skewed;
+        const absBaseValue = Math.abs(baseValue);
+
+        // VARIANT system - calculate but don't apply yet
+        const variants = [
+          { name: 'shiny', chance: 1 / 100, multiplier: 100 },
+          { name: 'golden', chance: 1 / 500, multiplier: 500 },
+          { name: 'inverse', chance: 1 / 1000, multiplier: 1000 },
+          { name: 'retro', chance: 1 / 2500, multiplier: 2500 },
+          { name: 'bright', chance: 1 / 5000, multiplier: 5000 },
+          { name: 'cosmic', chance: 1 / 10000, multiplier: 10000 },
+          { name: 'GIGANTIC', chance: 1 / 25000, multiplier: 25000 },
+          { name: 'h o r s e', chance: 1 / 30000, multiplier: 1 / 10 },
+          { name: 'eternal', chance: 1 / 50000, multiplier: 50000 },
+          { name: 'dark', chance: 1 / 77777, multiplier: 77777 },
+          { name: 'UNIVERSAL', chance: 1 / 100000, multiplier: 100000 }
+        ];
+
+        let variantText = '';
+        let variantMultiplier = 1;
+
+        variants.forEach(v => {
+          if (Math.random() < v.chance) {
+            variantMultiplier *= v.multiplier;
+            variantText += `[${v.name.toUpperCase()}] `;
+          }
+        });
+
+        // Determine rank based ONLY on baseValue (before variants)
+        let rank = '';
+        let displayValue = baseValue; // Will be modified for special ranks only
+
+        // Special ranks that override the value
+        if (Math.random() < 1 / 98900) { 
+          rank = 'INSANE'; 
+          displayValue = 0.989; 
+          isSpecial = true; 
+        }
+        else if (Math.random() < 1 / 1500) { 
+          rank = 'Lmao'; 
+          displayValue = 0.1; 
+          isSpecial = true; 
+        }
+        else if (Math.abs(baseValue - 5000) < 0.01) { 
+          rank = 'PERFECTIONIST'; 
+          isSpecial = true; 
+        }
+        else if (Math.random() < 1 / 8888) { 
+          rank = "Imaginary"; 
+          displayValue = "0.1i"; 
+          isSpecial = true; 
+        }
+        // Normal ranks based on baseValue (not affected by variants)
+        else if (baseValue === -1) { 
+          // 1/25 chance for NOTHINGNESS when rolling nil
+          if (Math.random() < 1 / 25) {
+            rank = 'NOTHINGNESS';
+            displayValue = '-error';
+            isSpecial = true;
+            auraCooldown = true;
+          } else {
+            rank = 'nil'; 
+            isSpecial = true; 
+            auraCooldown = true;
+          }
+        }
+        else if (Math.abs(baseValue - 1) < 0.0001) {
+          rank = 'nothing';
+        }
+        else if (absBaseValue >= 69 && absBaseValue <= 69.001) { 
+          rank = 'NICE'; 
+          isSpecial = true; 
+          auraCooldown = true; 
+        }
+        else if (absBaseValue >= 69420 && absBaseValue <= 69420.001) { 
+          rank = 'FUNNY'; 
+          isSpecial = true; 
+          auraCooldown = true; 
+        }
+        else if (absBaseValue < 5) {
+          if (Math.random() < 1 / 33333) { 
+            rank = 'Common : DIVINITY'; 
+            displayValue *= 5e5; 
+            isSpecial = true; 
+          }
+          else { rank = 'Common'; }
+        }
+        else if (absBaseValue < 25) rank = 'Natural';
+        else if (absBaseValue < 50) rank = 'Rare';
+        else if (absBaseValue < 100) rank = 'Unnatural';
+        else if (absBaseValue < 250) rank = 'Epic';
+        else if (absBaseValue < 500) rank = 'Decent';
+        else if (absBaseValue < 1000) rank = 'Mythical';
+        else if (absBaseValue < 5000) rank = 'Legendary';
+        else if (absBaseValue < 10000) rank = 'Unreal';
+        else if (absBaseValue < 50000) rank = 'Super Rare';
+        else if (absBaseValue < 100000) rank = 'Eternal';
+        else if (absBaseValue < 500000) rank = 'Starstruck';
+        else if (absBaseValue < 1000000) rank = 'Paradoxical';
+        else if (absBaseValue < 5000000) rank = 'Iridescent';
+        else if (absBaseValue < 10000000) rank = 'Lux';
+        else if (absBaseValue < 50000000) rank = 'Possible';
+        else if (absBaseValue < 100000000) rank = 'RNGesus';
+        else if (absBaseValue < 250000000) rank = 'CRAZY';
+        else if (absBaseValue < 1000000000) rank = 'Supreme';
+        else if (absBaseValue < 1e10) rank = 'DAMN';
+        else if (absBaseValue < 1e12) rank = 'Stupiditium';
+        else if (absBaseValue < 1e15) rank = 'ASCENDED';
+        else if (absBaseValue < 1e18) rank = 'Obscure';
+        else if (absBaseValue < 1e21) rank = 'INFINITE';
+        else if (absBaseValue < 1e30) rank = 'Divine';
+        else if (absBaseValue < 1e50) rank = 'Insurmountable';
+        else if (absBaseValue < 1e75) rank = 'GRAND';
+        else if (absBaseValue < 1e100) rank = 'what.';
+        else rank = 'FINALE';
+
+        // NOW apply variants to displayValue (after rank is determined)
+        displayValue = displayValue * variantMultiplier;
+        const absDisplayValue = Math.abs(displayValue);
+
+        let dispValue;
+        if (typeof displayValue === 'number') {
+          if (isReverted) {
+            // Show as scientific notation for reverted rolls (e.g., 1/1000 = 1e-3)
+            const exponent = Math.floor(Math.log10(Math.abs(displayValue)));
+            const mantissa = Math.abs(displayValue) / Math.pow(10, exponent);
+            dispValue = `${mantissa.toFixed(2)}e${exponent}`;
+          } else if (Math.abs(displayValue) >= 1e12) {
+            dispValue = displayValue.toExponential(4);
+          } else if (Math.abs(displayValue) >= 1000) {
+            // Format with commas
+            dispValue = displayValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+          } else {
+            dispValue = displayValue.toFixed(2);
+          }
+        } else {
+          dispValue = displayValue;
+        }
+
+        let result = '';
+        let invVariants = '';
+        if (variantText) {
+          result += variantText;
+          invVariants = variantText.trim();
+        }
+        if (isNegative) result += '[NEGATIVE] ';
+        if (isReverted) result += '[REVERTED] ';
+        const color = getColor(absDisplayValue);
+
+        // Create clickable rank for inventory
+        const rankButton = `<button class="rank-button" id="rank-btn-ROLLINDEX" onclick="acceptRoll(ROLLINDEX)">${rank}</button>`;
+
+        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???'].includes(rank)) {
+          result += `<span class="bold" style="color:${color};">You rolled a/an RANKBUTTON (${dispValue})!</span>`;
+        } else {
+          result += `<span style="color:${color};">You rolled a/an ${dispValue} RANKBUTTON!</span>`;
+        }
+
+        // Cooldown based on display value (with variants)
+        let cooldown = 0;
+        if (isSpecial) cooldown = 2500;
+        else if (absDisplayValue >= 1e6) cooldown = 4000;
+        else if (absDisplayValue >= 1e5) cooldown = 2000;
+        else if (absDisplayValue >= 1e4) cooldown = 1000;
+
+        const inventoryData = {
+          variants: invVariants,
+          displayValue: dispValue,
+          rank: rank,
+          color: color
+        };
+
+        return { result, cooldown, inventoryData };
+      }
+
+      rollOnceBtn.addEventListener('click', () => {
+        if (isCooldown) return;
+        multiRolls = []; // Reset for single roll
+        const roll = rollOnce();
+        multiRolls.push(roll.inventoryData);
+        
+        // Replace ROLLINDEX with 0 and RANKBUTTON with the actual button
+        let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
+          `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>` : 
+          roll.inventoryData ? roll.inventoryData.rank : '???');
+        
+        resultsDiv.innerHTML = displayResult;
+        if (roll.cooldown > 0) setCooldown(roll.cooldown);
+      });
+
+      rollMultipleBtn.addEventListener('click', () => {
+        if (isCooldown) return;
+        let maxCooldown = 0;
+        let output = '';
+        multiRolls = [];
+        
+        for (let i = 0; i < 15; i++) {
+          const roll = rollOnce();
+          multiRolls.push(roll.inventoryData);
+          
+          // Replace ROLLINDEX with actual index and RANKBUTTON with the button
+          let displayResult = roll.result.replace(/ROLLINDEX/g, i.toString()).replace(/RANKBUTTON/g, roll.inventoryData ? 
+            `<button class="rank-button" id="rank-btn-${i}" onclick="acceptRoll(${i})">${roll.inventoryData.rank}</button>` : 
+            '???');
+          
+          output += `<div class="roll-line">${displayResult}</div>`;
+          if (roll.cooldown > maxCooldown) maxCooldown = roll.cooldown;
+        }
+        
+        resultsDiv.innerHTML = output;
+        if (maxCooldown > 0) setCooldown(maxCooldown);
+      });
+
+      // Make acceptRoll available globally
+      window.acceptRoll = acceptRoll;
+
+      // Initialize
+      loadInventory();
+    </script>
+  </body>
+</html>
