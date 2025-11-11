@@ -253,12 +253,11 @@
         if (saved) {
           try {
             discovered = JSON.parse(saved);
-            // Add secretRanks if it doesn't exist (for backwards compatibility)
-            if (!discovered.secretRanks) {
-              discovered.secretRanks = [];
-            }
+            // Add new categories if they don't exist
+            if (!discovered.secretRanks) discovered.secretRanks = [];
+            if (!discovered.variantSecrets) discovered.variantSecrets = [];
           } catch (e) {
-            discovered = { ranks: [], specialRanks: [], secretRanks: [], variants: [] };
+            discovered = { ranks: [], specialRanks: [], secretRanks: [], variantSecrets: [], variants: [] };
           }
         }
       }
@@ -284,6 +283,15 @@
           const icon = isDiscovered ? '✓' : '✗';
           const className = isDiscovered ? 'discovered' : 'undiscovered';
           html += `<div class="index-item ${className}">${icon} ${v}</div>`;
+        });
+        html += '</div>';
+
+        html += '<div class="index-category"><h3>Variant Secrets</h3>';
+        ALL_VARIANT_SECRETS.forEach(r => {
+          const isDiscovered = discovered.variantSecrets.includes(r);
+          const icon = isDiscovered ? '✓' : '✗';
+          const className = isDiscovered ? 'discovered' : 'undiscovered';
+          html += `<div class="index-item ${className}">${icon} ${r}</div>`;
         });
         html += '</div>';
 
@@ -464,6 +472,32 @@
         let isNegative = false;
         let isReverted = false;
 
+        // Everlasting 1/575,765,100
+        if (Math.random() < (1 / 575765100) * luckMultiplier) {
+          isSpecial = true;
+          markDiscovered('specialRanks', 'Everlasting');
+          const invData = {
+            variants: '',
+            displayValue: '0i',
+            rank: 'Everlasting',
+            color: 'cyan'
+          };
+          return { result: '<span class="bold" style="color: cyan;">You rolled a/an RANKBUTTON (0i)!</span>', cooldown: 2500, inventoryData: invData };
+        }
+
+        // UNOBTAINABLE 1/1,000,000,000
+        if (Math.random() < (1 / 1000000000) * luckMultiplier) {
+          isSpecial = true;
+          markDiscovered('specialRanks', 'UNOBTAINABLE');
+          const invData = {
+            variants: '',
+            displayValue: '1.0000e+9',
+            rank: 'UNOBTAINABLE',
+            color: 'red'
+          };
+          return { result: '<span class="bold" style="color: red;">You rolled a/an RANKBUTTON (1.0000e+9)!</span>', cooldown: 2500, inventoryData: invData };
+        }
+
         // Legacy FINALE 1/25,000,000
         if (Math.random() < (1 / 25000000) * luckMultiplier) {
           isSpecial = true;
@@ -545,10 +579,14 @@
 
         let base = Math.random();
         let skewed;
-        if (base < 0.7) skewed = 1 + Math.random() * 9;
-        else if (base < 0.9) skewed = 10 + Math.random() * 40;
-        else if (base < 0.99) skewed = 50 + Math.random() * 450;
-        else skewed = 500 + Math.random() * 9500;
+        if (base < 0.5) skewed = 1 + Math.random() * 9;
+        else if (base < 0.75) skewed = 10 + Math.random() * 90;
+        else if (base < 0.90) skewed = 100 + Math.random() * 900;
+        else if (base < 0.97) skewed = 1000 + Math.random() * 9000;
+        else if (base < 0.99) skewed = 10000 + Math.random() * 90000;
+        else if (base < 0.997) skewed = 100000 + Math.random() * 900000;
+        else if (base < 0.9995) skewed = 1000000 + Math.random() * 9000000;
+        else skewed = 10000000 + Math.random() * 90000000;
 
         skewed = Math.max(1, skewed);
         if (Math.random() < 1 / 1000) skewed = -1;
@@ -623,6 +661,22 @@
             markDiscovered('variants', v.name);
           }
         });
+
+        // Check for variant secrets AFTER variants are determined
+        let variantSecret = null;
+        let variantSecretMultiplier = 1;
+        let removeVariant = null;
+
+        // Check if we have the Gigaconfuscibretrationiminousis variant
+        if (discoveredVariants.includes('Gigaconfuscibretrationiminousis')) {
+          if (Math.random() < 1 / 2.5) {
+            variantSecret = 'COLOSSAL';
+            variantSecretMultiplier = 25000000;
+            removeVariant = 'Gigaconfuscibretrationiminousis';
+            markDiscovered('variantSecrets', 'COLOSSAL');
+            isSpecial = true; // Triggers cooldown
+          }
+        }
 
         // Determine rank based ONLY on baseValue
         let rank = '';
@@ -750,6 +804,11 @@
           displayValue = displayValue * secretMultiplier;
         }
 
+        // Apply variant secret multiplier
+        if (variantSecret && typeof displayValue === 'number') {
+          displayValue = displayValue * variantSecretMultiplier;
+        }
+
         const absDisplayValue = typeof displayValue === 'number' ? Math.abs(displayValue) : 0;
 
         // Recalculate dispValue after all multipliers
@@ -769,9 +828,28 @@
 
         let result = '';
         let invVariants = '';
+        
+        // Remove the specific variant if variant secret was triggered
+        if (removeVariant) {
+          const removeIndex = discoveredVariants.indexOf(removeVariant);
+          if (removeIndex > -1) {
+            discoveredVariants.splice(removeIndex, 1);
+          }
+          // Rebuild variantText without the removed variant
+          variantText = '';
+          discoveredVariants.forEach(v => {
+            variantText += `[${v.toUpperCase()}] `;
+          });
+        }
+        
         if (variantText) {
           result += variantText;
           invVariants = variantText.trim();
+        }
+        if (variantSecret) {
+          result += `<${variantSecret}> `;
+          if (invVariants) invVariants += ' ';
+          invVariants += `<${variantSecret}>`;
         }
         if (secretRank) {
           result += `{${secretRank}} `;
@@ -785,7 +863,7 @@
         // Create clickable rank for inventory
         const rankButton = `<button class="rank-button" id="rank-btn-ROLLINDEX" onclick="acceptRoll(ROLLINDEX)">${rank}</button>`;
 
-        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>'].includes(rank)) {
+        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>','UNOBTAINABLE','Everlasting'].includes(rank)) {
           result += `<span class="bold" style="color:${color};">You rolled a/an RANKBUTTON (${dispValue})!</span>`;
         } else {
           result += `<span style="color:${color};">You rolled a/an ${dispValue} RANKBUTTON!</span>`;
@@ -830,8 +908,8 @@
         multiRolls = [];
         
         for (let i = 0; i < 15; i++) {
-          // Normal luck for multi-roll (no multipliers)
-          const roll = rollOnce(1, 1, 1);
+          // x3.5 luck multipliers for multi-roll
+          const roll = rollOnce(3.5, 3.5, 3.5);
           multiRolls.push(roll.inventoryData);
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, i.toString()).replace(/RANKBUTTON/g, roll.inventoryData ? 
