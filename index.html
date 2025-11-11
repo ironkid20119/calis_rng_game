@@ -456,14 +456,14 @@
         return 'red';
       }
 
-      function rollOnce() {
+      function rollOnce(luckMultiplier = 1, variantLuckMultiplier = 1, secretLuckMultiplier = 1) {
         let isSpecial = false;
         let auraCooldown = false;
         let isNegative = false;
         let isReverted = false;
 
         // Legacy FINALE 1/25,000,000
-        if (Math.random() < 1 / 25000000) {
+        if (Math.random() < (1 / 25000000) * luckMultiplier) {
           isSpecial = true;
           markDiscovered('specialRanks', 'Legacy FINALE');
           const invData = {
@@ -476,7 +476,7 @@
         }
 
         // <(ETERNAL DAWN)> 1/10,000,000
-        if (Math.random() < 1 / 10000000) {
+        if (Math.random() < (1 / 10000000) * luckMultiplier) {
           isSpecial = true;
           markDiscovered('specialRanks', '<(ETERNAL DAWN)>');
           const invData = {
@@ -489,7 +489,7 @@
         }
 
         // Catastrophic 1/390625
-        if (Math.random() < 1 / 390625) {
+        if (Math.random() < (1 / 390625) * luckMultiplier) {
           isSpecial = true;
           markDiscovered('specialRanks', 'Catastrophic');
           const invData = {
@@ -502,7 +502,7 @@
         }
 
         // Ultra rare 1/75k
-        if (Math.random() < 1 / 75000) {
+        if (Math.random() < (1 / 75000) * luckMultiplier) {
           isSpecial = true;
           auraCooldown = true;
           markDiscovered('specialRanks', 'In im table ?!?!?');
@@ -516,7 +516,7 @@
         }
 
         // Ultra rare unknown 1/1234567
-        if (Math.random() < 1 / 1234567) {
+        if (Math.random() < (1 / 1234567) * luckMultiplier) {
           isSpecial = true;
           markDiscovered('specialRanks', '???UNKNOWN???');
           const invData = {
@@ -529,7 +529,7 @@
         }
 
         // Leaflet 1/2763
-        if (Math.random() < 1 / 2763) {
+        if (Math.random() < (1 / 2763) * luckMultiplier) {
           isSpecial = true;
           markDiscovered('specialRanks', 'leaflet');
           const invData = {
@@ -568,6 +568,28 @@
         const baseValue = skewed;
         const absBaseValue = Math.abs(baseValue);
 
+        // SECRET RANK system - check before variants
+        let secretRank = null;
+        let secretMultiplier = 1;
+
+        if (Math.random() < (1 / 88888) * secretLuckMultiplier) {
+          secretRank = 'ULTIMATE';
+          secretMultiplier = 750;
+          markDiscovered('secretRanks', 'ULTIMATE');
+        } else if (Math.random() < (1 / 40000) * secretLuckMultiplier) {
+          secretRank = '🌳';
+          secretMultiplier = 400;
+          markDiscovered('secretRanks', '🌳');
+        } else if (Math.random() < (1 / 9999) * secretLuckMultiplier) {
+          secretRank = 'Destiny';
+          secretMultiplier = 99.99;
+          markDiscovered('secretRanks', 'Destiny');
+        } else if (Math.random() < (1 / 6942) * secretLuckMultiplier) {
+          secretRank = '🐟';
+          secretMultiplier = 10;
+          markDiscovered('secretRanks', '🐟');
+        }
+
         // VARIANT system
         const variants = [
           { name: 'shiny', chance: 1 / 100, multiplier: 100 },
@@ -592,7 +614,7 @@
         let discoveredVariants = [];
 
         variants.forEach(v => {
-          if (Math.random() < v.chance) {
+          if (Math.random() < v.chance * variantLuckMultiplier) {
             variantMultiplier *= v.multiplier;
             variantText += `[${v.name.toUpperCase()}] `;
             discoveredVariants.push(v.name);
@@ -719,8 +741,17 @@
         // Apply variant multiplier only to numeric display values
         if (typeof displayValue !== 'string' && variantMultiplier !== 1) {
           displayValue = displayValue * variantMultiplier;
-          const absDisplayValue = Math.abs(displayValue);
-          
+        }
+
+        // Apply secret rank multiplier
+        if (secretRank && typeof displayValue === 'number') {
+          displayValue = displayValue * secretMultiplier;
+        }
+
+        const absDisplayValue = typeof displayValue === 'number' ? Math.abs(displayValue) : 0;
+
+        // Recalculate dispValue after all multipliers
+        if (typeof displayValue === 'number') {
           if (isReverted) {
             const exponent = Math.floor(Math.log10(Math.abs(displayValue)));
             const mantissa = Math.abs(displayValue) / Math.pow(10, exponent);
@@ -733,14 +764,17 @@
             dispValue = displayValue.toFixed(2);
           }
         }
-        
-        const absDisplayValue = typeof displayValue === 'number' ? Math.abs(displayValue) : 0;
 
         let result = '';
         let invVariants = '';
         if (variantText) {
           result += variantText;
           invVariants = variantText.trim();
+        }
+        if (secretRank) {
+          result += `{${secretRank}} `;
+          if (invVariants) invVariants += ' ';
+          invVariants += `{${secretRank}}`;
         }
         if (isNegative) result += '[NEGATIVE] ';
         if (isReverted) result += '[REVERTED] ';
@@ -775,7 +809,8 @@
       rollOnceBtn.addEventListener('click', () => {
         if (isCooldown) return;
         multiRolls = [];
-        const roll = rollOnce();
+        // x10 luck, x7.5 variant luck, x5 secret luck for single rolls
+        const roll = rollOnce(10, 7.5, 5);
         multiRolls.push(roll.inventoryData);
         
         let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
@@ -793,7 +828,8 @@
         multiRolls = [];
         
         for (let i = 0; i < 15; i++) {
-          const roll = rollOnce();
+          // Normal luck for multi-roll (no multipliers)
+          const roll = rollOnce(1, 1, 1);
           multiRolls.push(roll.inventoryData);
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, i.toString()).replace(/RANKBUTTON/g, roll.inventoryData ? 
