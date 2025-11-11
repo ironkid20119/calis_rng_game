@@ -162,7 +162,7 @@
         padding: 20px;
         background: rgba(255, 255, 255, 0.05);
         border-radius: 10px;
-        max-height: 400px;
+        max-height: 500px;
         overflow-y: auto;
       }
 
@@ -199,6 +199,80 @@
       #toggleIndex:hover {
         background-color: #8a2dcd;
       }
+
+      #toggleShop {
+        margin-top: 10px;
+        background-color: #d4af37;
+        color: #000;
+      }
+
+      #toggleShop:hover {
+        background-color: #f0c748;
+      }
+
+      #toggleSellMode {
+        background-color: #ff6b35;
+      }
+
+      #toggleSellMode:hover {
+        background-color: #ff8555;
+      }
+
+      #toggleSellMode.active {
+        background-color: #ff3333;
+      }
+
+      .shop-section {
+        margin-top: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+      }
+
+      .coins-display {
+        font-size: 24px;
+        font-weight: 700;
+        color: #d4af37;
+        margin-bottom: 20px;
+      }
+
+      .shop-item {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+        border: 2px solid #555;
+      }
+
+      .shop-item h4 {
+        margin: 0 0 10px 0;
+        color: #fff;
+      }
+
+      .shop-item p {
+        margin: 5px 0;
+        font-size: 14px;
+      }
+
+      .shop-item button {
+        margin-top: 10px;
+        background-color: #d4af37;
+        color: #000;
+      }
+
+      .shop-item button:hover:not(:disabled) {
+        background-color: #f0c748;
+      }
+
+      .shop-item button:disabled {
+        background-color: #555;
+        color: #888;
+      }
+
+      .maxed {
+        color: #4ade80;
+        font-weight: 700;
+      }
     </style>
   </head>
   <body>
@@ -207,12 +281,20 @@
       <button id="rollOnceBtn">Roll Once</button>
       <button id="rollMultipleBtn">Roll 15 Times</button>
       <button id="toggleIndex">Toggle Index</button>
+      <button id="toggleShop">Toggle Shop</button>
+      <button id="toggleSellMode">Sell Mode: OFF</button>
 
       <div id="results"></div>
 
       <div class="inventory-section">
-        <h2>Inventory (25 slots)</h2>
+        <h2>Inventory (<span id="inventoryCount">0</span>/<span id="maxSlotsDisplay">25</span> slots)</h2>
         <div class="inventory-grid" id="inventoryGrid"></div>
+      </div>
+
+      <div class="shop-section" id="shopSection" style="display: none;">
+        <h2>Shop</h2>
+        <div class="coins-display">Cali-coins: <span id="coinsDisplay">0</span></div>
+        <div id="shopContent"></div>
       </div>
 
       <div class="index-section" id="indexSection" style="display: none;">
@@ -226,26 +308,49 @@
       const rollOnceBtn = document.getElementById('rollOnceBtn');
       const rollMultipleBtn = document.getElementById('rollMultipleBtn');
       const toggleIndexBtn = document.getElementById('toggleIndex');
+      const toggleShopBtn = document.getElementById('toggleShop');
+      const toggleSellModeBtn = document.getElementById('toggleSellMode');
       const indexSection = document.getElementById('indexSection');
+      const shopSection = document.getElementById('shopSection');
       const indexContent = document.getElementById('indexContent');
+      const shopContent = document.getElementById('shopContent');
+      const coinsDisplay = document.getElementById('coinsDisplay');
+      const inventoryCountDisplay = document.getElementById('inventoryCount');
+      const maxSlotsDisplay = document.getElementById('maxSlotsDisplay');
       const inventoryGrid = document.getElementById('inventoryGrid');
       let isCooldown = false;
       let multiRolls = [];
       let inventory = [];
       let discovered = { ranks: [], specialRanks: [], secretRanks: [], variantSecrets: [], variants: [] };
+      let caliCoins = 0;
+      let maxSlots = 25;
+      let sellExponent = 0.33;
+      let rollBulk = 15;
+      let variantLuckBonus = 1;
+      let availabilityUnlocked = false;
+      
+      // Shop upgrade levels
+      let shopUpgrades = {
+        inventorySpace: 0,
+        variantLuck: 0,
+        rollBulk: 0,
+        availability: false
+      };
+      
       const MAX_SLOTS = 25;
       let lastClickTime = {};
+      let sellMode = false;
 
       // All possible ranks, special ranks, secret ranks, variant secrets, and variants
       const ALL_RANKS = ['nothing', 'Common', 'Natural', 'Rare', 'Unnatural', 'Epic', 'Decent', 'Mythical', 'Legendary', 'Unreal', 'Super Rare', 'Eternal', 'Starstruck', 'Paradoxical', 'Iridescent', 'Lux', 'Possible', 'RNGesus', 'CRAZY', 'Supreme', 'DAMN', 'Stupiditium', 'ASCENDED', 'Obscure', 'INFINITE', 'Divine', 'Insurmountable', 'GRAND', 'what.', 'FINALE'];
       
-      const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>', 'UNOBTAINABLE', 'Everlasting'];
+      const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>', 'UNOBTAINABLE', 'Everlasting', 'RNGod', 'Invisible', 'cali'];
       
       const ALL_SECRET_RANKS = ['🐟', 'Destiny', '🌳', 'ULTIMATE'];
       
       const ALL_VARIANT_SECRETS = ['(Existance)', 'COLOSSAL'];
       
-      const ALL_VARIANTS = ['shiny', 'golden', 'inverse', 'retro', 'bright', 'cosmic', 'GIGANTIC', 'h o r s e', 'eternal', 'dark', 'UNIVERSAL', 'Modified', 'Colorful', 'Gigaconfuscibretrationiminousis', 'Possible'];
+      const ALL_VARIANTS = ['shiny', 'golden', 'inverse', 'retro', 'bright', 'cosmic', 'GIGANTIC', 'h o r s e', 'eternal', 'dark', 'UNIVERSAL', 'Modified', 'Colorful', 'Gigaconfuscibretrationiminousis', 'Possible', 'Gargantuan', 'Ethereal', 'Limitless'];
 
       // Load discovered items
       function loadDiscovered() {
@@ -297,10 +402,15 @@
 
         html += '<div class="index-category"><h3>Special Ranks</h3>';
         ALL_SPECIAL_RANKS.forEach(r => {
-          const isDiscovered = discovered.specialRanks.includes(r);
-          const icon = isDiscovered ? '✓' : '✗';
-          const className = isDiscovered ? 'discovered' : 'undiscovered';
-          html += `<div class="index-item ${className}">${icon} ${r}</div>`;
+          // Hide "cali" if availability not unlocked
+          if (r === 'cali' && !availabilityUnlocked) {
+            html += `<div class="index-item undiscovered">✗ ???</div>`;
+          } else {
+            const isDiscovered = discovered.specialRanks.includes(r);
+            const icon = isDiscovered ? '✓' : '✗';
+            const className = isDiscovered ? 'discovered' : 'undiscovered';
+            html += `<div class="index-item ${className}">${icon} ${r}</div>`;
+          }
         });
         html += '</div>';
 
@@ -328,11 +438,118 @@
       toggleIndexBtn.addEventListener('click', () => {
         if (indexSection.style.display === 'none') {
           indexSection.style.display = 'block';
+          shopSection.style.display = 'none';
           renderIndex();
         } else {
           indexSection.style.display = 'none';
         }
       });
+
+      toggleShopBtn.addEventListener('click', () => {
+        if (shopSection.style.display === 'none') {
+          shopSection.style.display = 'block';
+          indexSection.style.display = 'none';
+          renderShop();
+        } else {
+          shopSection.style.display = 'none';
+        }
+      });
+
+      toggleSellModeBtn.addEventListener('click', () => {
+        sellMode = !sellMode;
+        toggleSellModeBtn.textContent = `Sell Mode: ${sellMode ? 'ON' : 'OFF'}`;
+        toggleSellModeBtn.classList.toggle('active', sellMode);
+        renderInventory();
+      });
+
+      // Render shop
+      function renderShop() {
+        let html = '';
+        
+        // Inventory Space Upgrade
+        const invCost = Math.floor(10 * Math.pow(1.65, shopUpgrades.inventorySpace));
+        const invMaxed = shopUpgrades.inventorySpace >= 5;
+        html += `<div class="shop-item">
+          <h4>+5 Inventory Space</h4>
+          <p>Current: ${maxSlots} slots</p>
+          <p>Cost: ${invCost} Cali-coins</p>
+          <p>Upgrades: ${shopUpgrades.inventorySpace}/5</p>
+          ${invMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('inventorySpace')" ${caliCoins < invCost || invMaxed ? 'disabled' : ''}>Buy</button>`}
+        </div>`;
+        
+        // Variant Luck Upgrade
+        const varCost = Math.floor(100 * Math.pow(1.25, shopUpgrades.variantLuck || 0));
+        const varMaxed = (shopUpgrades.variantLuck || 0) >= 20;
+        html += `<div class="shop-item">
+          <h4>+0.25x Variant Luck</h4>
+          <p>Current: ${variantLuckBonus.toFixed(2)}x</p>
+          <p>Cost: ${varCost} Cali-coins</p>
+          <p>Upgrades: ${shopUpgrades.variantLuck || 0}/20</p>
+          ${varMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('variantLuck')" ${caliCoins < varCost || varMaxed ? 'disabled' : ''}>Buy</button>`}
+        </div>`;
+        
+        // Roll Bulk Upgrade
+        const bulkCost = Math.floor(50 * Math.pow(2.5, shopUpgrades.rollBulk));
+        const bulkMaxed = shopUpgrades.rollBulk >= 5;
+        html += `<div class="shop-item">
+          <h4>+1 Bulk Roll</h4>
+          <p>Current: Roll ${rollBulk} Times</p>
+          <p>Cost: ${bulkCost} Cali-coins</p>
+          <p>Upgrades: ${shopUpgrades.rollBulk}/5</p>
+          ${bulkMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('rollBulk')" ${caliCoins < bulkCost || bulkMaxed ? 'disabled' : ''}>Buy</button>`}
+        </div>`;
+        
+        // Availability Upgrade
+        html += `<div class="shop-item">
+          <h4>Availability</h4>
+          <p>Makes ??? rollable</p>
+          <p>Cost: 100,000 Cali-coins</p>
+          ${shopUpgrades.availability ? '<p class="maxed">PURCHASED</p>' : `<button onclick="buyUpgrade('availability')" ${caliCoins < 100000 || shopUpgrades.availability ? 'disabled' : ''}>Buy</button>`}
+        </div>`;
+        
+        shopContent.innerHTML = html;
+      }
+
+      // Buy upgrade
+      window.buyUpgrade = function(type) {
+        let cost, maxLevel;
+        
+        if (type === 'inventorySpace') {
+          cost = Math.floor(10 * Math.pow(1.65, shopUpgrades.inventorySpace));
+          maxLevel = 5;
+          if (caliCoins >= cost && shopUpgrades.inventorySpace < maxLevel) {
+            caliCoins -= cost;
+            shopUpgrades.inventorySpace++;
+            maxSlots = 25 + (shopUpgrades.inventorySpace * 5);
+          }
+        } else if (type === 'variantLuck') {
+          cost = Math.floor(100 * Math.pow(1.25, shopUpgrades.variantLuck || 0));
+          maxLevel = 20;
+          if (caliCoins >= cost && (shopUpgrades.variantLuck || 0) < maxLevel) {
+            caliCoins -= cost;
+            shopUpgrades.variantLuck = (shopUpgrades.variantLuck || 0) + 1;
+            variantLuckBonus = 1 + (shopUpgrades.variantLuck * 0.25);
+          }
+        } else if (type === 'rollBulk') {
+          cost = Math.floor(50 * Math.pow(2.5, shopUpgrades.rollBulk));
+          maxLevel = 5;
+          if (caliCoins >= cost && shopUpgrades.rollBulk < maxLevel) {
+            caliCoins -= cost;
+            shopUpgrades.rollBulk++;
+            rollBulk = 15 + shopUpgrades.rollBulk;
+          }
+        } else if (type === 'availability') {
+          cost = 100000;
+          if (caliCoins >= cost && !shopUpgrades.availability) {
+            caliCoins -= cost;
+            shopUpgrades.availability = true;
+            availabilityUnlocked = true;
+          }
+        }
+        
+        saveShop();
+        renderInventory();
+      };
 
       // Load inventory from localStorage
       function loadInventory() {
@@ -346,6 +563,24 @@
         } else {
           inventory = [];
         }
+        
+        // Load shop data
+        const shopSaved = localStorage.getItem('calisRngShop');
+        if (shopSaved) {
+          try {
+            const shopData = JSON.parse(shopSaved);
+            caliCoins = shopData.coins || 0;
+            shopUpgrades = shopData.upgrades || { inventorySpace: 0, variantLuck: 0, rollBulk: 0, availability: false };
+            maxSlots = 25 + (shopUpgrades.inventorySpace * 5);
+            variantLuckBonus = 1 + (shopUpgrades.variantLuck * 0.25);
+            rollBulk = 15 + shopUpgrades.rollBulk;
+            availabilityUnlocked = shopUpgrades.availability || false;
+          } catch (e) {
+            console.error('Failed to load shop data');
+          }
+        }
+        
+        updateCoinsDisplay();
         renderInventory();
       }
 
@@ -355,10 +590,30 @@
         renderInventory();
       }
 
+      // Save shop data
+      function saveShop() {
+        const shopData = {
+          coins: caliCoins,
+          upgrades: shopUpgrades
+        };
+        localStorage.setItem('calisRngShop', JSON.stringify(shopData));
+        updateCoinsDisplay();
+        renderShop();
+      }
+
+      // Update coins display
+      function updateCoinsDisplay() {
+        coinsDisplay.textContent = caliCoins.toFixed(2);
+        rollMultipleBtn.textContent = `Roll ${rollBulk} Times`;
+      }
+
       // Render inventory grid
       function renderInventory() {
         inventoryGrid.innerHTML = '';
-        for (let i = 0; i < MAX_SLOTS; i++) {
+        inventoryCountDisplay.textContent = inventory.length;
+        maxSlotsDisplay.textContent = maxSlots;
+        
+        for (let i = 0; i < maxSlots; i++) {
           const slot = document.createElement('div');
           slot.className = 'inventory-slot';
           
@@ -384,7 +639,13 @@
             rankDiv.textContent = item.rank;
             slot.appendChild(rankDiv);
             
-            slot.onclick = () => deleteItem(i);
+            if (sellMode) {
+              slot.onclick = () => sellItem(i);
+              slot.style.cursor = 'pointer';
+              slot.style.borderColor = '#ff6b35';
+            } else {
+              slot.onclick = () => deleteItem(i);
+            }
           } else {
             slot.className = 'inventory-slot empty';
             slot.textContent = 'Empty';
@@ -392,6 +653,42 @@
           
           inventoryGrid.appendChild(slot);
         }
+      }
+
+      // Sell item
+      function sellItem(index) {
+        if (!inventory[index]) return;
+        const item = inventory[index];
+        
+        // Check if it's a normal rank (not special, secret, or has variants/secrets)
+        const isNormalRank = ALL_RANKS.includes(item.rank) && 
+                            !item.variants && 
+                            !ALL_SPECIAL_RANKS.includes(item.rank) &&
+                            !ALL_SECRET_RANKS.includes(item.rank) &&
+                            !ALL_VARIANT_SECRETS.includes(item.rank);
+        
+        if (!isNormalRank) {
+          alert('You can only sell normal ranks without variants or secrets!');
+          return;
+        }
+        
+        // Parse the numeric value
+        let numericValue = parseFloat(item.displayValue.replace(/,/g, ''));
+        if (isNaN(numericValue)) {
+          alert('Cannot sell this item!');
+          return;
+        }
+        
+        // Calculate coins: value^sellExponent
+        const coins = Math.pow(Math.abs(numericValue), sellExponent);
+        caliCoins += coins;
+        
+        // Remove item
+        inventory.splice(index, 1);
+        saveInventory();
+        saveShop();
+        
+        alert(`Sold for ${coins.toFixed(2)} Cali-coins!`);
       }
 
       // Delete item on double click
@@ -411,8 +708,8 @@
       // Add to inventory
       function addToInventory(item, buttonId) {
         if (!item) return;
-        if (inventory.length >= MAX_SLOTS) {
-          alert('Inventory full! Delete items to make space.');
+        if (inventory.length >= maxSlots) {
+          alert('Inventory full! Delete items or buy more space.');
           return;
         }
         
@@ -471,6 +768,19 @@
         let auraCooldown = false;
         let isNegative = false;
         let isReverted = false;
+
+        // RNGod 1/1,000,000 - replaces any 1M+ special rank
+        if (Math.random() < (1 / 1000000) * luckMultiplier) {
+          isSpecial = true;
+          markDiscovered('specialRanks', 'RNGod');
+          const invData = {
+            variants: '',
+            displayValue: '1.0000e+6',
+            rank: 'RNGod',
+            color: 'gold'
+          };
+          return { result: '<span class="bold" style="color: gold;">You rolled a/an RANKBUTTON (1.0000e+6)!</span>', cooldown: 5000, inventoryData: invData };
+        }
 
         // Everlasting 1/575,765,100
         if (Math.random() < (1 / 575765100) * luckMultiplier) {
@@ -577,6 +887,32 @@
           return { result: '<span class="bold" style="color: lightgreen;">You rolled a/an RANKBUTTON (2,763.00)!</span>', cooldown: 2763, inventoryData: invData };
         }
 
+        // Invisible 1/50,000
+        if (Math.random() < (1 / 50000) * luckMultiplier) {
+          isSpecial = true;
+          markDiscovered('specialRanks', 'Invisible');
+          const invData = {
+            variants: '',
+            displayValue: 'Invisible',
+            rank: 'Invisible',
+            color: 'rgba(255, 192, 203, 0.05)'
+          };
+          return { result: '<span class="bold" style="color: rgba(255, 192, 203, 0.05);">You rolled a/an RANKBUTTON (Invisible)!</span>', cooldown: 2500, inventoryData: invData };
+        }
+
+        // cali 1/10,000,000 (only if availability unlocked)
+        if (availabilityUnlocked && Math.random() < (1 / 10000000) * luckMultiplier) {
+          isSpecial = true;
+          markDiscovered('specialRanks', 'cali');
+          const invData = {
+            variants: '',
+            displayValue: '-1,581,532,333.00',
+            rank: 'cali',
+            color: 'magenta'
+          };
+          return { result: '<span class="bold" style="color: magenta;">You rolled a/an RANKBUTTON (-1,581,532,333.00)!</span>', cooldown: 5000, inventoryData: invData };
+        }
+
         let base = Math.random();
         let skewed;
         if (base < 0.5) skewed = 1 + Math.random() * 9;
@@ -645,8 +981,11 @@
           { name: 'eternal', chance: 1 / 50000, multiplier: 50000 },
           { name: 'dark', chance: 1 / 77777, multiplier: 77777 },
           { name: 'UNIVERSAL', chance: 1 / 100000, multiplier: 100000 },
+          { name: 'Gargantuan', chance: 1 / 300000, multiplier: 300000 },
           { name: 'Possible', chance: 1 / 500000, multiplier: 500000 },
-          { name: 'Gigaconfuscibretrationiminousis', chance: 1 / 1000000, multiplier: 1000000 }
+          { name: 'Gigaconfuscibretrationiminousis', chance: 1 / 1000000, multiplier: 1000000 },
+          { name: 'Ethereal', chance: 1 / 2500000, multiplier: 2500000 },
+          { name: 'Limitless', chance: 1 / 10000000, multiplier: 10000000 }
         ];
 
         let variantText = '';
@@ -654,7 +993,7 @@
         let discoveredVariants = [];
 
         variants.forEach(v => {
-          if (Math.random() < v.chance * variantLuckMultiplier) {
+          if (Math.random() < v.chance * variantLuckMultiplier * variantLuckBonus) {
             variantMultiplier *= v.multiplier;
             variantText += `[${v.name.toUpperCase()}] `;
             discoveredVariants.push(v.name);
@@ -863,7 +1202,7 @@
         // Create clickable rank for inventory
         const rankButton = `<button class="rank-button" id="rank-btn-ROLLINDEX" onclick="acceptRoll(ROLLINDEX)">${rank}</button>`;
 
-        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>','UNOBTAINABLE','Everlasting'].includes(rank)) {
+        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>','UNOBTAINABLE','Everlasting','RNGod','Invisible','cali'].includes(rank)) {
           result += `<span class="bold" style="color:${color};">You rolled a/an RANKBUTTON (${dispValue})!</span>`;
         } else {
           result += `<span style="color:${color};">You rolled a/an ${dispValue} RANKBUTTON!</span>`;
@@ -907,7 +1246,7 @@
         let output = '';
         multiRolls = [];
         
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < rollBulk; i++) {
           // x3.5 luck multipliers for multi-roll
           const roll = rollOnce(3.5, 3.5, 3.5);
           multiRolls.push(roll.inventoryData);
