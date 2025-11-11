@@ -232,14 +232,16 @@
       let isCooldown = false;
       let multiRolls = [];
       let inventory = [];
-      let discovered = { ranks: [], specialRanks: [], variants: [] };
+      let discovered = { ranks: [], specialRanks: [], secretRanks: [], variants: [] };
       const MAX_SLOTS = 25;
       let lastClickTime = {};
 
-      // All possible ranks, special ranks, and variants
+      // All possible ranks, special ranks, secret ranks, and variants
       const ALL_RANKS = ['nothing', 'Common', 'Natural', 'Rare', 'Unnatural', 'Epic', 'Decent', 'Mythical', 'Legendary', 'Unreal', 'Super Rare', 'Eternal', 'Starstruck', 'Paradoxical', 'Iridescent', 'Lux', 'Possible', 'RNGesus', 'CRAZY', 'Supreme', 'DAMN', 'Stupiditium', 'ASCENDED', 'Obscure', 'INFINITE', 'Divine', 'Insurmountable', 'GRAND', 'what.', 'FINALE'];
       
       const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>'];
+      
+      const ALL_SECRET_RANKS = ['🐟', 'Destiny', '🌳', 'ULTIMATE'];
       
       const ALL_VARIANTS = ['shiny', 'golden', 'inverse', 'retro', 'bright', 'cosmic', 'GIGANTIC', 'h o r s e', 'eternal', 'dark', 'UNIVERSAL', 'Modified', 'Colorful', 'Gigaconfuscibretrationiminousis', 'Possible'];
 
@@ -249,8 +251,12 @@
         if (saved) {
           try {
             discovered = JSON.parse(saved);
+            // Add secretRanks if it doesn't exist (for backwards compatibility)
+            if (!discovered.secretRanks) {
+              discovered.secretRanks = [];
+            }
           } catch (e) {
-            discovered = { ranks: [], specialRanks: [], variants: [] };
+            discovered = { ranks: [], specialRanks: [], secretRanks: [], variants: [] };
           }
         }
       }
@@ -282,6 +288,15 @@
         html += '<div class="index-category"><h3>Special Ranks</h3>';
         ALL_SPECIAL_RANKS.forEach(r => {
           const isDiscovered = discovered.specialRanks.includes(r);
+          const icon = isDiscovered ? '✓' : '✗';
+          const className = isDiscovered ? 'discovered' : 'undiscovered';
+          html += `<div class="index-item ${className}">${icon} ${r}</div>`;
+        });
+        html += '</div>';
+
+        html += '<div class="index-category"><h3>Secret Ranks</h3>';
+        ALL_SECRET_RANKS.forEach(r => {
+          const isDiscovered = discovered.secretRanks.includes(r);
           const icon = isDiscovered ? '✓' : '✗';
           const className = isDiscovered ? 'discovered' : 'undiscovered';
           html += `<div class="index-item ${className}">${icon} ${r}</div>`;
