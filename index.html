@@ -232,16 +232,18 @@
       let isCooldown = false;
       let multiRolls = [];
       let inventory = [];
-      let discovered = { ranks: [], specialRanks: [], secretRanks: [], variants: [] };
+      let discovered = { ranks: [], specialRanks: [], secretRanks: [], variantSecrets: [], variants: [] };
       const MAX_SLOTS = 25;
       let lastClickTime = {};
 
-      // All possible ranks, special ranks, secret ranks, and variants
+      // All possible ranks, special ranks, secret ranks, variant secrets, and variants
       const ALL_RANKS = ['nothing', 'Common', 'Natural', 'Rare', 'Unnatural', 'Epic', 'Decent', 'Mythical', 'Legendary', 'Unreal', 'Super Rare', 'Eternal', 'Starstruck', 'Paradoxical', 'Iridescent', 'Lux', 'Possible', 'RNGesus', 'CRAZY', 'Supreme', 'DAMN', 'Stupiditium', 'ASCENDED', 'Obscure', 'INFINITE', 'Divine', 'Insurmountable', 'GRAND', 'what.', 'FINALE'];
       
-      const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>'];
+      const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>', 'UNOBTAINABLE', 'Everlasting'];
       
       const ALL_SECRET_RANKS = ['🐟', 'Destiny', '🌳', 'ULTIMATE'];
+      
+      const ALL_VARIANT_SECRETS = ['(Existance)', 'COLOSSAL'];
       
       const ALL_VARIANTS = ['shiny', 'golden', 'inverse', 'retro', 'bright', 'cosmic', 'GIGANTIC', 'h o r s e', 'eternal', 'dark', 'UNIVERSAL', 'Modified', 'Colorful', 'Gigaconfuscibretrationiminousis', 'Possible'];
 
