@@ -546,7 +546,7 @@
         </div>`;
         
         const generalCost = Math.floor(100 * Math.pow(1.05, shopUpgrades.generalLuck || 0));
-        const generalMaxed = (shopUpgrades.generalLuck || 0) >= 1000;
+        const generalMaxed = (shopUpgrades.generalLuck || 0) >= 0;
         html += `<div class="shop-item">
           <h4>+0.05x General Luck</h4>
           <p>Current: ${generalLuckBonus.toFixed(2)}x</p>
@@ -631,7 +631,7 @@
           }
         } else if (type === 'generalLuck') {
           cost = Math.floor(100 * Math.pow(1.05, shopUpgrades.generalLuck || 0));
-          maxLevel = 10000;
+          maxLevel = 98000;
           if (caliCoins >= cost && (shopUpgrades.generalLuck || 0) < maxLevel) {
             caliCoins -= cost;
             shopUpgrades.generalLuck = (shopUpgrades.generalLuck || 0) + 1;
