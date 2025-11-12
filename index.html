@@ -1210,10 +1210,10 @@
 
         // Cooldown based on display value (with variants)
         let cooldown = 0;
-        if (isSpecial) cooldown = 750;
+        if (isSpecial) cooldown = 500;
         else if (absDisplayValue >= 1e12) cooldown = 4000;
-        else if (absDisplayValue >= 1e9) cooldown = 2000;
-        else if (absDisplayValue >= 1e6) cooldown = 1000;
+        else if (absDisplayValue >= 1e10) cooldown = 2000;
+        else if (absDisplayValue >= 1e8) cooldown = 1000;
 
         const inventoryData = {
           variants: invVariants,
