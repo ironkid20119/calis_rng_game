@@ -273,11 +273,20 @@
         color: #4ade80;
         font-weight: 700;
       }
+
+      .roll-counter {
+        margin-bottom: 15px;
+        font-size: 18px;
+        color: #d4af37;
+      }
     </style>
   </head>
   <body>
     <div class="game-container">
       <h1>calis rng game</h1>
+      <div class="roll-counter">
+        Total Rolls: <span id="rollCounter">0</span>
+      </div>
       <button id="rollOnceBtn">Roll Once</button>
       <button id="rollMultipleBtn">Roll 15 Times</button>
       <button id="toggleIndex">Toggle Index</button>
@@ -318,6 +327,7 @@
       const inventoryCountDisplay = document.getElementById('inventoryCount');
       const maxSlotsDisplay = document.getElementById('maxSlotsDisplay');
       const inventoryGrid = document.getElementById('inventoryGrid');
+      const rollCounterDisplay = document.getElementById('rollCounter');
       let isCooldown = false;
       let multiRolls = [];
       let inventory = [];
@@ -328,13 +338,16 @@
       let rollBulk = 15;
       let variantLuckBonus = 1;
       let availabilityUnlocked = false;
+      let totalRolls = 0;
+      let calisBlessingActive = false;
       
       // Shop upgrade levels
       let shopUpgrades = {
         inventorySpace: 0,
         variantLuck: 0,
         rollBulk: 0,
-        availability: false
+        availability: false,
+        calisBlessing: false
       };
       
       const MAX_SLOTS = 25;
@@ -507,6 +520,17 @@
           ${shopUpgrades.availability ? '<p class="maxed">PURCHASED</p>' : `<button onclick="buyUpgrade('availability')" ${caliCoins < 100000 || shopUpgrades.availability ? 'disabled' : ''}>Buy</button>`}
         </div>`;
         
+        // Cali's Blessing Upgrade
+        const blessingBonus = calisBlessingActive && totalRolls > 1 ? 
+          Math.min(5, Math.pow(Math.log10(totalRolls), 0.9)) : 0;
+        html += `<div class="shop-item">
+          <h4>Cali's Blessing</h4>
+          <p>Multiplies all luck by log(rolls)^0.9 (max +5x)</p>
+          <p>Current bonus: +${blessingBonus.toFixed(2)}x</p>
+          <p>Cost: 777,777 Cali-coins</p>
+          ${shopUpgrades.calisBlessing ? '<p class="maxed">PURCHASED</p>' : `<button onclick="buyUpgrade('calisBlessing')" ${caliCoins < 777777 || shopUpgrades.calisBlessing ? 'disabled' : ''}>Buy</button>`}
+        </div>`;
+        
         shopContent.innerHTML = html;
       }
 
@@ -545,6 +569,13 @@
             shopUpgrades.availability = true;
             availabilityUnlocked = true;
           }
+        } else if (type === 'calisBlessing') {
+          cost = 777777;
+          if (caliCoins >= cost && !shopUpgrades.calisBlessing) {
+            caliCoins -= cost;
+            shopUpgrades.calisBlessing = true;
+            calisBlessingActive = true;
+          }
         }
         
         saveShop();
@@ -570,17 +601,20 @@
           try {
             const shopData = JSON.parse(shopSaved);
             caliCoins = shopData.coins || 0;
-            shopUpgrades = shopData.upgrades || { inventorySpace: 0, variantLuck: 0, rollBulk: 0, availability: false };
+            totalRolls = shopData.totalRolls || 0;
+            shopUpgrades = shopData.upgrades || { inventorySpace: 0, variantLuck: 0, rollBulk: 0, availability: false, calisBlessing: false };
             maxSlots = 25 + (shopUpgrades.inventorySpace * 5);
             variantLuckBonus = 1 + (shopUpgrades.variantLuck * 0.25);
             rollBulk = 15 + shopUpgrades.rollBulk;
             availabilityUnlocked = shopUpgrades.availability || false;
+            calisBlessingActive = shopUpgrades.calisBlessing || false;
           } catch (e) {
             console.error('Failed to load shop data');
           }
         }
         
         updateCoinsDisplay();
+        updateRollCounter();
         renderInventory();
       }
 
@@ -594,10 +628,12 @@
       function saveShop() {
         const shopData = {
           coins: caliCoins,
+          totalRolls: totalRolls,
           upgrades: shopUpgrades
         };
         localStorage.setItem('calisRngShop', JSON.stringify(shopData));
         updateCoinsDisplay();
+        updateRollCounter();
         renderShop();
       }
 
@@ -605,6 +641,11 @@
       function updateCoinsDisplay() {
         coinsDisplay.textContent = caliCoins.toFixed(2);
         rollMultipleBtn.textContent = `Roll ${rollBulk} Times`;
+      }
+
+      // Update roll counter
+      function updateRollCounter() {
+        rollCounterDisplay.textContent = totalRolls;
       }
 
       // Render inventory grid
@@ -660,15 +701,14 @@
         if (!inventory[index]) return;
         const item = inventory[index];
         
-        // Check if it's a normal rank (not special, secret, or has variants/secrets)
+        // Check if it's a normal rank (not special, secret)
         const isNormalRank = ALL_RANKS.includes(item.rank) && 
-                            !item.variants && 
                             !ALL_SPECIAL_RANKS.includes(item.rank) &&
                             !ALL_SECRET_RANKS.includes(item.rank) &&
                             !ALL_VARIANT_SECRETS.includes(item.rank);
         
         if (!isNormalRank) {
-          alert('You can only sell normal ranks without variants or secrets!');
+          alert('You can only sell normal ranks!');
           return;
         }
         
@@ -764,6 +804,17 @@
       }
 
       function rollOnce(luckMultiplier = 1, variantLuckMultiplier = 1, secretLuckMultiplier = 1) {
+        // Calculate Cali's Blessing bonus
+        let blessingBonus = 0;
+        if (calisBlessingActive && totalRolls > 1) {
+          blessingBonus = Math.min(5, Math.pow(Math.log10(totalRolls), 0.9));
+        }
+        
+        // Apply blessing bonus additively
+        luckMultiplier += blessingBonus;
+        variantLuckMultiplier += blessingBonus;
+        secretLuckMultiplier += blessingBonus;
+        
         let isSpecial = false;
         let auraCooldown = false;
         let isNegative = false;
@@ -1228,6 +1279,8 @@
       rollOnceBtn.addEventListener('click', () => {
         if (isCooldown) return;
         multiRolls = [];
+        totalRolls++;
+        saveShop();
         // x10 luck, x7.5 variant luck, x5 secret luck for single rolls
         const roll = rollOnce(17.5, 15, 10);
         multiRolls.push(roll.inventoryData);
@@ -1247,6 +1300,7 @@
         multiRolls = [];
         
         for (let i = 0; i < rollBulk; i++) {
+          totalRolls++;
           // x3.5 luck multipliers for multi-roll
           const roll = rollOnce(5, 5, 5);
           multiRolls.push(roll.inventoryData);
@@ -1259,6 +1313,7 @@
           if (roll.cooldown > maxCooldown) maxCooldown = roll.cooldown;
         }
         
+        saveShop();
         resultsDiv.innerHTML = output;
         if (maxCooldown > 0) setCooldown(maxCooldown);
       });
