@@ -106,7 +106,7 @@
 
       .inventory-grid {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(50, 1fr);
         gap: 10px;
         margin-top: 15px;
       }
@@ -296,7 +296,7 @@
       <div id="results"></div>
 
       <div class="inventory-section">
-        <h2>Inventory (<span id="inventoryCount">0</span>/<span id="maxSlotsDisplay">25</span> slots)</h2>
+        <h2>Inventory (<span id="inventoryCount">0</span>/<span id="maxSlotsDisplay">250</span> slots)</h2>
         <div class="inventory-grid" id="inventoryGrid"></div>
       </div>
 
@@ -333,20 +333,22 @@
       let inventory = [];
       let discovered = { ranks: [], specialRanks: [], secretRanks: [], variantSecrets: [], variants: [] };
       let caliCoins = 0;
-      let maxSlots = 25;
-      let sellExponent = 0.40;
+      let maxSlots = 250;
+      let sellExponent = 0.33;
       let rollBulk = 15;
       let variantLuckBonus = 1;
       let availabilityUnlocked = false;
       let totalRolls = 0;
       let calisBlessingActive = false;
       let blessingBoosterActive = false;
+      let secretLuckBonus = 1;
       
       // Shop upgrade levels
       let shopUpgrades = {
-        inventorySpace: 0,
         variantLuck: 0,
         rollBulk: 0,
+        secretLuck: 0,
+        sellPower: 0,
         availability: false,
         calisBlessing: false,
         blessingBooster: false
@@ -481,17 +483,6 @@
       function renderShop() {
         let html = '';
         
-        // Inventory Space Upgrade
-        const invCost = Math.floor(10 * Math.pow(1.65, shopUpgrades.inventorySpace));
-        const invMaxed = shopUpgrades.inventorySpace >= 5;
-        html += `<div class="shop-item">
-          <h4>+5 Inventory Space</h4>
-          <p>Current: ${maxSlots} slots</p>
-          <p>Cost: ${invCost} Cali-coins</p>
-          <p>Upgrades: ${shopUpgrades.inventorySpace}/5</p>
-          ${invMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('inventorySpace')" ${caliCoins < invCost || invMaxed ? 'disabled' : ''}>Buy</button>`}
-        </div>`;
-        
         // Variant Luck Upgrade
         const varCost = Math.floor(100 * Math.pow(1.25, shopUpgrades.variantLuck || 0));
         const varMaxed = (shopUpgrades.variantLuck || 0) >= 20;
@@ -504,7 +495,7 @@
         </div>`;
         
         // Roll Bulk Upgrade
-        const bulkCost = Math.floor(50 * Math.pow(2.5, shopUpgrades.rollBulk));
+        const bulkCost = Math.floor(50 * Math.pow(1.05, shopUpgrades.rollBulk));
         const bulkMaxed = shopUpgrades.rollBulk >= 35;
         html += `<div class="shop-item">
           <h4>+1 Bulk Roll</h4>
@@ -512,6 +503,28 @@
           <p>Cost: ${bulkCost} Cali-coins</p>
           <p>Upgrades: ${shopUpgrades.rollBulk}/35</p>
           ${bulkMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('rollBulk')" ${caliCoins < bulkCost || bulkMaxed ? 'disabled' : ''}>Buy</button>`}
+        </div>`;
+        
+        // Secret Luck Upgrade
+        const secretCost = Math.floor(100 * Math.pow(1.01, shopUpgrades.secretLuck || 0));
+        const secretMaxed = (shopUpgrades.secretLuck || 0) >= 280;
+        html += `<div class="shop-item">
+          <h4>+0.05x Secret Luck</h4>
+          <p>Current: ${secretLuckBonus.toFixed(2)}x</p>
+          <p>Cost: ${secretCost} Cali-coins</p>
+          <p>Upgrades: ${shopUpgrades.secretLuck || 0}/280</p>
+          ${secretMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('secretLuck')" ${caliCoins < secretCost || secretMaxed ? 'disabled' : ''}>Buy</button>`}
+        </div>`;
+        
+        // Sell Power Upgrade
+        const sellCost = Math.floor(1000 * Math.pow(1000, shopUpgrades.sellPower || 0));
+        const sellMaxed = (shopUpgrades.sellPower || 0) >= 2;
+        html += `<div class="shop-item">
+          <h4>+0.33 Sell Exponent</h4>
+          <p>Current: ^${sellExponent.toFixed(2)}</p>
+          <p>Cost: ${sellCost.toLocaleString()} Cali-coins</p>
+          <p>Upgrades: ${shopUpgrades.sellPower || 0}/2</p>
+          ${sellMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('sellPower')" ${caliCoins < sellCost || sellMaxed ? 'disabled' : ''}>Buy</button>`}
         </div>`;
         
         // Availability Upgrade
@@ -552,15 +565,7 @@
       window.buyUpgrade = function(type) {
         let cost, maxLevel;
         
-        if (type === 'inventorySpace') {
-          cost = Math.floor(10 * Math.pow(1.65, shopUpgrades.inventorySpace));
-          maxLevel = 5;
-          if (caliCoins >= cost && shopUpgrades.inventorySpace < maxLevel) {
-            caliCoins -= cost;
-            shopUpgrades.inventorySpace++;
-            maxSlots = 25 + (shopUpgrades.inventorySpace * 5);
-          }
-        } else if (type === 'variantLuck') {
+        if (type === 'variantLuck') {
           cost = Math.floor(100 * Math.pow(1.25, shopUpgrades.variantLuck || 0));
           maxLevel = 20;
           if (caliCoins >= cost && (shopUpgrades.variantLuck || 0) < maxLevel) {
@@ -569,12 +574,28 @@
             variantLuckBonus = 1 + (shopUpgrades.variantLuck * 0.25);
           }
         } else if (type === 'rollBulk') {
-          cost = Math.floor(50 * Math.pow(2.5, shopUpgrades.rollBulk));
+          cost = Math.floor(50 * Math.pow(1.05, shopUpgrades.rollBulk));
           maxLevel = 35;
           if (caliCoins >= cost && shopUpgrades.rollBulk < maxLevel) {
             caliCoins -= cost;
             shopUpgrades.rollBulk++;
             rollBulk = 15 + shopUpgrades.rollBulk;
+          }
+        } else if (type === 'secretLuck') {
+          cost = Math.floor(100 * Math.pow(1.01, shopUpgrades.secretLuck || 0));
+          maxLevel = 280;
+          if (caliCoins >= cost && (shopUpgrades.secretLuck || 0) < maxLevel) {
+            caliCoins -= cost;
+            shopUpgrades.secretLuck = (shopUpgrades.secretLuck || 0) + 1;
+            secretLuckBonus = 1 + (shopUpgrades.secretLuck * 0.05);
+          }
+        } else if (type === 'sellPower') {
+          cost = Math.floor(1000 * Math.pow(1000, shopUpgrades.sellPower || 0));
+          maxLevel = 2;
+          if (caliCoins >= cost && (shopUpgrades.sellPower || 0) < maxLevel) {
+            caliCoins -= cost;
+            shopUpgrades.sellPower = (shopUpgrades.sellPower || 0) + 1;
+            sellExponent = 0.33 + (shopUpgrades.sellPower * 0.33);
           }
         } else if (type === 'availability') {
           cost = 100000;
@@ -623,10 +644,11 @@
             const shopData = JSON.parse(shopSaved);
             caliCoins = shopData.coins || 0;
             totalRolls = shopData.totalRolls || 0;
-            shopUpgrades = shopData.upgrades || { inventorySpace: 0, variantLuck: 0, rollBulk: 0, availability: false, calisBlessing: false, blessingBooster: false };
-            maxSlots = 25 + (shopUpgrades.inventorySpace * 5);
-            variantLuckBonus = 1 + (shopUpgrades.variantLuck * 0.25);
-            rollBulk = 15 + shopUpgrades.rollBulk;
+            shopUpgrades = shopData.upgrades || { variantLuck: 0, rollBulk: 0, secretLuck: 0, sellPower: 0, availability: false, calisBlessing: false, blessingBooster: false };
+            variantLuckBonus = 1 + ((shopUpgrades.variantLuck || 0) * 0.25);
+            secretLuckBonus = 1 + ((shopUpgrades.secretLuck || 0) * 0.05);
+            sellExponent = 0.33 + ((shopUpgrades.sellPower || 0) * 0.33);
+            rollBulk = 15 + (shopUpgrades.rollBulk || 0);
             availabilityUnlocked = shopUpgrades.availability || false;
             calisBlessingActive = shopUpgrades.calisBlessing || false;
             blessingBoosterActive = shopUpgrades.blessingBooster || false;
@@ -693,7 +715,14 @@
             
             const valueDiv = document.createElement('div');
             valueDiv.className = 'slot-value';
-            valueDiv.style.color = item.color;
+            if (item.color.startsWith('linear-gradient')) {
+              valueDiv.style.background = item.color;
+              valueDiv.style.webkitBackgroundClip = 'text';
+              valueDiv.style.webkitTextFillColor = 'transparent';
+              valueDiv.style.backgroundClip = 'text';
+            } else {
+              valueDiv.style.color = item.color;
+            }
             valueDiv.textContent = item.displayValue;
             slot.appendChild(valueDiv);
             
@@ -822,7 +851,10 @@
         if (value < 1000000000) return 'cyan';
         if (value < 1000000000000) return 'purple';
         if (value < 1000000000000000) return 'green';
-        return 'red';
+        if (value < 1e18) return 'red';
+        if (value < 1e21) return 'pink';
+        if (value < 1e24) return 'orange';
+        return 'linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet)';
       }
 
       function rollOnce(luckMultiplier = 1, variantLuckMultiplier = 1, secretLuckMultiplier = 1) {
@@ -1036,11 +1068,11 @@
           markDiscovered('specialRanks', 'Invisible');
           const invData = {
             variants: '',
-            displayValue: 'Invisible',
+            displayValue: '',
             rank: 'Invisible',
             color: 'rgba(255, 192, 203, 0.05)'
           };
-          return { result: '<span class="bold" style="color: rgba(255, 192, 203, 0.05);">You rolled a/an RANKBUTTON (Invisible)!</span>', cooldown: 2500, inventoryData: invData };
+          return { result: '<span class="bold" style="color: rgba(255, 192, 203, 0.05);">You rolled a/an RANKBUTTON!</span>', cooldown: 2500, inventoryData: invData };
         }
 
         // cali 1/10,000,000 (only if availability unlocked)
@@ -1346,9 +1378,17 @@
         const rankButton = `<button class="rank-button" id="rank-btn-ROLLINDEX" onclick="acceptRoll(ROLLINDEX)">${rank}</button>`;
 
         if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>','UNOBTAINABLE','Everlasting','RNGod','Invisible','cali','RNGarbage'].includes(rank)) {
-          result += `<span class="bold" style="color:${color};">You rolled a/an RANKBUTTON (${dispValue})!</span>`;
+          if (color.startsWith('linear-gradient')) {
+            result += `<span class="bold" style="background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">You rolled a/an RANKBUTTON (${dispValue})!</span>`;
+          } else {
+            result += `<span class="bold" style="color:${color};">You rolled a/an RANKBUTTON (${dispValue})!</span>`;
+          }
         } else {
-          result += `<span style="color:${color};">You rolled a/an ${dispValue} RANKBUTTON!</span>`;
+          if (color.startsWith('linear-gradient')) {
+            result += `<span style="background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">You rolled a/an ${dispValue} RANKBUTTON!</span>`;
+          } else {
+            result += `<span style="color:${color};">You rolled a/an ${dispValue} RANKBUTTON!</span>`;
+          }
         }
 
         // Cooldown based on display value (with variants) - FIXED
@@ -1357,7 +1397,7 @@
           cooldown = 500;
         } else {
           // Normal cooldown logic (not affected by blessing)
-          if (absDisplayValue >= 1e12) cooldown = 4000;
+          if (absDisplayValue >= 1e15) cooldown = 1500;
         }
 
         const inventoryData = {
@@ -1375,8 +1415,8 @@
         multiRolls = [];
         totalRolls++;
         saveShop();
-        // x10 luck, x7.5 variant luck, x5 secret luck for single rolls
-        const roll = rollOnce(17.5, 15, 10);
+        // x10 luck, x7.5 variant luck, secretLuckBonus for single rolls
+        const roll = rollOnce(17.5, 15, 10 * secretLuckBonus);
         multiRolls.push(roll.inventoryData);
         
         let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
@@ -1396,7 +1436,7 @@
         for (let i = 0; i < rollBulk; i++) {
           totalRolls++;
           // x3.5 luck multipliers for multi-roll
-          const roll = rollOnce(5, 5, 5);
+          const roll = rollOnce(5, 5, 5 * secretLuckBonus);
           multiRolls.push(roll.inventoryData);
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, i.toString()).replace(/RANKBUTTON/g, roll.inventoryData ? 
