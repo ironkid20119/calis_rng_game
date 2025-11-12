@@ -1351,14 +1351,12 @@
           result += `<span style="color:${color};">You rolled a/an ${dispValue} RANKBUTTON!</span>`;
         }
 
-        // Cooldown based on display value (with variants)
+        // Cooldown based on display value (with variants) - FIXED
         let cooldown = 0;
-        if (isSpecial) cooldown = 500;
-        else if (calisBlessingActive) {
-          // When blessing is active, minimum cooldown is based on 1e12
-          if (absDisplayValue >= 1e12) cooldown = 4000;
-          else cooldown = 4000; // Always 4000ms if blessing active
+        if (isSpecial) {
+          cooldown = 500;
         } else {
+          // Normal cooldown logic (not affected by blessing)
           if (absDisplayValue >= 1e12) cooldown = 4000;
           else if (absDisplayValue >= 1e10) cooldown = 2000;
           else if (absDisplayValue >= 1e8) cooldown = 1500;
