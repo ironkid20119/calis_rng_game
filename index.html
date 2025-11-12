@@ -915,6 +915,7 @@
         if (value < 1e18) return 'red';
         if (value < 1e21) return 'pink';
         if (value < 1e24) return 'orange';
+        if (value < 1e30) return 'linear-gradient(90deg, blue, purple)';
         return 'linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet)';
       }
 
@@ -1040,7 +1041,7 @@
         }
 
         // Ultra rare 1/75k
-        if (Math.random() < (1 / 75000) * luckMultiplier * specialLuckBonus) {
+        if (Math.random() < (1 / 750000) * luckMultiplier * specialLuckBonus) {
           isSpecial = true;
           auraCooldown = true;
           canHaveVariants = false;
@@ -1068,8 +1069,8 @@
           return { result: '<span class="bold">You rolled a/an RANKBUTTON (???)!</span>', cooldown: 2500, inventoryData: invData };
         }
 
-        // Leaflet 1/2763
-        if (Math.random() < (1 / 2763) * luckMultiplier * specialLuckBonus) {
+        // Leaflet 1/2,763,000
+        if (Math.random() < (1 / 2763000) * luckMultiplier * specialLuckBonus) {
           isSpecial = true;
           let leafletValue = 2763;
           originalValue = 2763;
@@ -1135,8 +1136,8 @@
           return { result: resultText, cooldown: 276.3, inventoryData: invData };
         }
 
-        // Invisible 1/50,000
-        if (Math.random() < (1 / 50000) * luckMultiplier * specialLuckBonus) {
+        // Invisible 1/500,000
+        if (Math.random() < (1 / 5000000) * luckMultiplier * specialLuckBonus) {
           isSpecial = true;
           canHaveVariants = false;
           originalValue = Math.random() * 50000;
