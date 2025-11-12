@@ -631,7 +631,7 @@
           }
         } else if (type === 'generalLuck') {
           cost = Math.floor(100 * Math.pow(1.05, shopUpgrades.generalLuck || 0));
-          maxLevel = 1000;
+          maxLevel = 10000;
           if (caliCoins >= cost && (shopUpgrades.generalLuck || 0) < maxLevel) {
             caliCoins -= cost;
             shopUpgrades.generalLuck = (shopUpgrades.generalLuck || 0) + 1;
