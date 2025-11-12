@@ -684,7 +684,7 @@
             totalRolls = shopData.totalRolls || 0;
             shopUpgrades = shopData.upgrades || { variantLuck: 0, rollBulk: 0, secretLuck: 0, specialLuck: 0, generalLuck: 0, sellPower: 0, availability: false, calisBlessing: false, blessingBooster: false };
             variantLuckBonus = 1 + ((shopUpgrades.variantLuck || 0) * 0.25);
-            secretLuckBonus = 1 + ((shopUpgrades.secretLuck || 0) * 0.05);
+            secretLuckBonus = 1 + ((shopUpgrades.secretLuck || 0) * 0.1);
             specialLuckBonus = 1 + ((shopUpgrades.specialLuck || 0) * 0.1);
             generalLuckBonus = 1 + ((shopUpgrades.generalLuck || 0) * 0.05);
             sellExponent = 0.33 + ((shopUpgrades.sellPower || 0) * 0.33);
@@ -890,6 +890,7 @@
         if (value < 1e48) return 'linear-gradient(90deg, white, black, white, black, white, black)';
         if (value < 1e51) return 'linear-gradient(75deg, red, pink, red, pink)';
         if (value < 1e54) return 'linear-gradient(90deg, red, pink, white, pink, red)';
+        if (value < 1e57) return 'linear-gradient(150deg, cyan, green, red, white)';
         return 'linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet)';
       }
 
@@ -1006,8 +1007,8 @@
           return { result: '<span class="bold" style="color: red;">You rolled a/an RANKBUTTON (-0.50)!</span>', cooldown: 3500, inventoryData: invData };
         }
 
-        // In im table ?!?!? 1/75k
-        if (Math.random() < (1 / 75000) * specialLuckBonus) {
+        // In im table ?!?!? 1/750k
+        if (Math.random() < (1 / 750000) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'In im table ?!?!?');
           const invData = {
