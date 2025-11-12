@@ -359,7 +359,7 @@
       // All possible ranks, special ranks, secret ranks, variant secrets, and variants
       const ALL_RANKS = ['nothing', 'Common', 'Natural', 'Rare', 'Unnatural', 'Epic', 'Decent', 'Mythical', 'Legendary', 'Unreal', 'Super Rare', 'Eternal', 'Starstruck', 'Paradoxical', 'Iridescent', 'Lux', 'Possible', 'RNGesus', 'CRAZY', 'Supreme', 'DAMN', 'Stupiditium', 'ASCENDED', 'Obscure', 'INFINITE', 'Divine', 'Insurmountable', 'GRAND', 'what.', 'FINALE'];
       
-      const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>', 'UNOBTAINABLE', 'Everlasting', 'RNGod', 'Invisible', 'cali'];
+      const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>', 'UNOBTAINABLE', 'Everlasting', 'RNGod', 'Invisible', 'cali', 'RNGarbage'];
       
       const ALL_SECRET_RANKS = ['🐟', 'Destiny', '🌳', 'ULTIMATE'];
       
@@ -524,13 +524,25 @@
         
         // Cali's Blessing Upgrade
         const blessingBonus = calisBlessingActive && totalRolls > 1 ? 
-          Math.min(5, Math.pow(Math.log10(totalRolls), 0.9)) : 0;
+          (blessingBoosterActive ? 
+            Math.min(25, Math.pow(Math.log10(totalRolls), 1.15)) : 
+            Math.min(5, Math.pow(Math.log10(totalRolls), 0.9))) : 0;
         html += `<div class="shop-item">
           <h4>Cali's Blessing</h4>
           <p>Multiplies all luck by log(rolls)^0.9 (max +5x)</p>
           <p>Current bonus: +${blessingBonus.toFixed(2)}x</p>
           <p>Cost: 777,777 Cali-coins</p>
           ${shopUpgrades.calisBlessing ? '<p class="maxed">PURCHASED</p>' : `<button onclick="buyUpgrade('calisBlessing')" ${caliCoins < 777777 || shopUpgrades.calisBlessing ? 'disabled' : ''}>Buy</button>`}
+        </div>`;
+        
+        // Cali's Blessing Booster Upgrade
+        html += `<div class="shop-item">
+          <h4>'Cali's Blessing' Booster</h4>
+          <p>Changes blessing formula to log(rolls)^1.15</p>
+          <p>Increases luck cap to +25x (for EVERYTHING)</p>
+          <p>Cost: 10,000,000 Cali-coins</p>
+          ${!shopUpgrades.calisBlessing ? '<p style="color: #888;">Requires Cali\'s Blessing</p>' : ''}
+          ${shopUpgrades.blessingBooster ? '<p class="maxed">PURCHASED</p>' : `<button onclick="buyUpgrade('blessingBooster')" ${caliCoins < 10000000 || shopUpgrades.blessingBooster || !shopUpgrades.calisBlessing ? 'disabled' : ''}>Buy</button>`}
         </div>`;
         
         shopContent.innerHTML = html;
@@ -578,6 +590,13 @@
             shopUpgrades.calisBlessing = true;
             calisBlessingActive = true;
           }
+        } else if (type === 'blessingBooster') {
+          cost = 10000000;
+          if (caliCoins >= cost && !shopUpgrades.blessingBooster && shopUpgrades.calisBlessing) {
+            caliCoins -= cost;
+            shopUpgrades.blessingBooster = true;
+            blessingBoosterActive = true;
+          }
         }
         
         saveShop();
@@ -604,12 +623,13 @@
             const shopData = JSON.parse(shopSaved);
             caliCoins = shopData.coins || 0;
             totalRolls = shopData.totalRolls || 0;
-            shopUpgrades = shopData.upgrades || { inventorySpace: 0, variantLuck: 0, rollBulk: 0, availability: false, calisBlessing: false };
+            shopUpgrades = shopData.upgrades || { inventorySpace: 0, variantLuck: 0, rollBulk: 0, availability: false, calisBlessing: false, blessingBooster: false };
             maxSlots = 25 + (shopUpgrades.inventorySpace * 5);
             variantLuckBonus = 1 + (shopUpgrades.variantLuck * 0.25);
             rollBulk = 15 + shopUpgrades.rollBulk;
             availabilityUnlocked = shopUpgrades.availability || false;
             calisBlessingActive = shopUpgrades.calisBlessing || false;
+            blessingBoosterActive = shopUpgrades.blessingBooster || false;
           } catch (e) {
             console.error('Failed to load shop data');
           }
@@ -809,7 +829,11 @@
         // Calculate Cali's Blessing bonus
         let blessingBonus = 0;
         if (calisBlessingActive && totalRolls > 1) {
-          blessingBonus = Math.min(5, Math.pow(Math.log10(totalRolls), 0.9));
+          if (blessingBoosterActive) {
+            blessingBonus = Math.min(25, Math.pow(Math.log10(totalRolls), 1.15));
+          } else {
+            blessingBonus = Math.min(5, Math.pow(Math.log10(totalRolls), 0.9));
+          }
         }
         
         // Apply blessing bonus additively
@@ -821,6 +845,19 @@
         let auraCooldown = false;
         let isNegative = false;
         let isReverted = false;
+
+        // RNGarbage 1/322,322 - replaces anything
+        if (Math.random() < (1 / 322322) * luckMultiplier) {
+          isSpecial = true;
+          markDiscovered('specialRanks', 'RNGarbage');
+          const invData = {
+            variants: '',
+            displayValue: 'Bum..',
+            rank: 'RNGarbage',
+            color: 'brown'
+          };
+          return { result: '<span class="bold" style="color: brown;">You rolled a/an RANKBUTTON (Bum..)!</span>', cooldown: 2500, inventoryData: invData };
+        }
 
         // RNGod 1/1,000,000 - replaces any 1M+ special rank
         if (Math.random() < (1 / 1000000) * luckMultiplier) {
@@ -930,14 +967,67 @@
         // Leaflet 1/2763
         if (Math.random() < (1 / 2763) * luckMultiplier) {
           isSpecial = true;
+          let leafletValue = 2763;
+          let leafletDispValue = '2,763.00';
+          let leafletVariants = '';
+          let leafletVariantMultiplier = 1;
+          let leafletDiscoveredVariants = [];
+          
+          // Check for variants on leaflet
+          const variants = [
+            { name: 'shiny', chance: 1 / 100, multiplier: 100 },
+            { name: 'Modified', chance: 1 / 250, multiplier: 250 },
+            { name: 'golden', chance: 1 / 500, multiplier: 500 },
+            { name: 'Colorful', chance: 1 / 777, multiplier: 777 },
+            { name: 'inverse', chance: 1 / 1000, multiplier: 1000 },
+            { name: 'retro', chance: 1 / 2500, multiplier: 2500 },
+            { name: 'bright', chance: 1 / 5000, multiplier: 5000 },
+            { name: 'cosmic', chance: 1 / 10000, multiplier: 10000 },
+            { name: 'GIGANTIC', chance: 1 / 25000, multiplier: 25000 },
+            { name: 'h o r s e', chance: 1 / 30000, multiplier: 1 / 10 },
+            { name: 'eternal', chance: 1 / 50000, multiplier: 50000 },
+            { name: 'dark', chance: 1 / 77777, multiplier: 77777 },
+            { name: 'UNIVERSAL', chance: 1 / 100000, multiplier: 100000 },
+            { name: 'Gargantuan', chance: 1 / 300000, multiplier: 300000 },
+            { name: 'Possible', chance: 1 / 500000, multiplier: 500000 },
+            { name: 'Gigaconfuscibretrationiminousis', chance: 1 / 1000000, multiplier: 1000000 },
+            { name: 'Ethereal', chance: 1 / 2500000, multiplier: 2500000 },
+            { name: 'Limitless', chance: 1 / 10000000, multiplier: 10000000 }
+          ];
+          
+          variants.forEach(v => {
+            if (Math.random() < v.chance * variantLuckMultiplier * variantLuckBonus) {
+              leafletVariantMultiplier *= v.multiplier;
+              leafletVariants += `[${v.name.toUpperCase()}] `;
+              leafletDiscoveredVariants.push(v.name);
+              markDiscovered('variants', v.name);
+            }
+          });
+          
+          if (leafletVariantMultiplier !== 1) {
+            leafletValue *= leafletVariantMultiplier;
+            if (leafletValue >= 1e12) {
+              leafletDispValue = leafletValue.toExponential(4);
+            } else if (leafletValue >= 1000) {
+              leafletDispValue = leafletValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            } else {
+              leafletDispValue = leafletValue.toFixed(2);
+            }
+          }
+          
           markDiscovered('specialRanks', 'leaflet');
           const invData = {
-            variants: '',
-            displayValue: '2,763.00',
+            variants: leafletVariants.trim(),
+            displayValue: leafletDispValue,
             rank: 'leaflet',
             color: 'lightgreen'
           };
-          return { result: '<span class="bold" style="color: lightgreen;">You rolled a/an RANKBUTTON (2,763.00)!</span>', cooldown: 2763, inventoryData: invData };
+          
+          let resultText = '';
+          if (leafletVariants) resultText += leafletVariants;
+          resultText += '<span class="bold" style="color: lightgreen;">You rolled a/an RANKBUTTON (' + leafletDispValue + ')!</span>';
+          
+          return { result: resultText, cooldown: 276.3, inventoryData: invData };
         }
 
         // Invisible 1/50,000
@@ -1255,7 +1345,7 @@
         // Create clickable rank for inventory
         const rankButton = `<button class="rank-button" id="rank-btn-ROLLINDEX" onclick="acceptRoll(ROLLINDEX)">${rank}</button>`;
 
-        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>','UNOBTAINABLE','Everlasting','RNGod','Invisible','cali'].includes(rank)) {
+        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>','UNOBTAINABLE','Everlasting','RNGod','Invisible','cali','RNGarbage'].includes(rank)) {
           result += `<span class="bold" style="color:${color};">You rolled a/an RANKBUTTON (${dispValue})!</span>`;
         } else {
           result += `<span style="color:${color};">You rolled a/an ${dispValue} RANKBUTTON!</span>`;
@@ -1264,9 +1354,15 @@
         // Cooldown based on display value (with variants)
         let cooldown = 0;
         if (isSpecial) cooldown = 500;
-        else if (absDisplayValue >= 1e12) cooldown = 4000;
-        else if (absDisplayValue >= 1e10) cooldown = 2000;
-        else if (absDisplayValue >= 1e8) cooldown = 1500;
+        else if (calisBlessingActive) {
+          // When blessing is active, minimum cooldown is based on 1e12
+          if (absDisplayValue >= 1e12) cooldown = 4000;
+          else cooldown = 4000; // Always 4000ms if blessing active
+        } else {
+          if (absDisplayValue >= 1e12) cooldown = 4000;
+          else if (absDisplayValue >= 1e10) cooldown = 2000;
+          else if (absDisplayValue >= 1e8) cooldown = 1500;
+        }
 
         const inventoryData = {
           variants: invVariants,
