@@ -505,12 +505,12 @@
         
         // Roll Bulk Upgrade
         const bulkCost = Math.floor(50 * Math.pow(2.5, shopUpgrades.rollBulk));
-        const bulkMaxed = shopUpgrades.rollBulk >= 5;
+        const bulkMaxed = shopUpgrades.rollBulk >= 35;
         html += `<div class="shop-item">
           <h4>+1 Bulk Roll</h4>
           <p>Current: Roll ${rollBulk} Times</p>
           <p>Cost: ${bulkCost} Cali-coins</p>
-          <p>Upgrades: ${shopUpgrades.rollBulk}/5</p>
+          <p>Upgrades: ${shopUpgrades.rollBulk}/35</p>
           ${bulkMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('rollBulk')" ${caliCoins < bulkCost || bulkMaxed ? 'disabled' : ''}>Buy</button>`}
         </div>`;
         
@@ -538,7 +538,7 @@
         // Cali's Blessing Booster Upgrade
         html += `<div class="shop-item">
           <h4>'Cali's Blessing' Booster</h4>
-          <p>Changes blessing formula to log(rolls)^1.15</p>
+          <p>Changes blessing formula to log(rolls)^2</p>
           <p>Increases luck cap to +25x (for EVERYTHING)</p>
           <p>Cost: 10,000,000 Cali-coins</p>
           ${!shopUpgrades.calisBlessing ? '<p style="color: #888;">Requires Cali\'s Blessing</p>' : ''}
@@ -570,7 +570,7 @@
           }
         } else if (type === 'rollBulk') {
           cost = Math.floor(50 * Math.pow(2.5, shopUpgrades.rollBulk));
-          maxLevel = 5;
+          maxLevel = 35;
           if (caliCoins >= cost && shopUpgrades.rollBulk < maxLevel) {
             caliCoins -= cost;
             shopUpgrades.rollBulk++;
@@ -830,7 +830,7 @@
         let blessingBonus = 0;
         if (calisBlessingActive && totalRolls > 1) {
           if (blessingBoosterActive) {
-            blessingBonus = Math.min(25, Math.pow(Math.log10(totalRolls), 1.15));
+            blessingBonus = Math.min(25, Math.pow(Math.log10(totalRolls), 2));
           } else {
             blessingBonus = Math.min(5, Math.pow(Math.log10(totalRolls), 0.9));
           }
