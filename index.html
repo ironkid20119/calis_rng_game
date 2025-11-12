@@ -902,7 +902,7 @@
         let blessingBonus = 0;
         if (calisBlessingActive && totalRolls > 1) {
           if (blessingBoosterActive) {
-            blessingBonus = Math.min(25, Math.pow(Math.log10(totalRolls), 2));
+            blessingBonus = Math.min(250, Math.pow(Math.log10(totalRolls), 3.33));
           } else {
             blessingBonus = Math.min(5, Math.pow(Math.log10(totalRolls), 0.9));
           }
@@ -1033,8 +1033,8 @@
           return { result: '<span class="bold">You rolled a/an RANKBUTTON (???)!</span>', cooldown: 0, inventoryData: invData };
         }
 
-        // Invisible 1/5,000,000
-        if (Math.random() < (1 / 5000000) * specialLuckBonus) {
+        // Invisible 1/500000
+        if (Math.random() < (1 / 500000) * specialLuckBonus) {
           isSpecial = true;
           originalValue = Math.random() * 50000;
           markDiscovered('specialRanks', 'Invisible');
@@ -1276,7 +1276,7 @@
         let dispValue;
         if (isSpecial && !['leaflet', 'Common : DIVINITY'].includes(rank) && originalValue !== null) {
           if (typeof originalValue === 'number') {
-            if (Math.abs(originalValue) >= 1e12) {
+            if (Math.abs(originalValue) >= 1e45) {
               dispValue = originalValue.toExponential(4);
             } else if (Math.abs(originalValue) >= 1000) {
               dispValue = originalValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -1291,7 +1291,7 @@
             const exponent = Math.floor(Math.log10(Math.abs(displayValue)));
             const mantissa = Math.abs(displayValue) / Math.pow(10, exponent);
             dispValue = `${mantissa.toFixed(2)}e${exponent}`;
-          } else if (Math.abs(displayValue) >= 1e12) {
+          } else if (Math.abs(displayValue) >= 1e45) {
             dispValue = displayValue.toExponential(4);
           } else if (Math.abs(displayValue) >= 1000) {
             dispValue = displayValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
