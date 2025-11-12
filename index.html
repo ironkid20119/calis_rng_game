@@ -646,7 +646,7 @@
             totalRolls = shopData.totalRolls || 0;
             shopUpgrades = shopData.upgrades || { variantLuck: 0, rollBulk: 0, secretLuck: 0, sellPower: 0, availability: false, calisBlessing: false, blessingBooster: false };
             variantLuckBonus = 1 + ((shopUpgrades.variantLuck || 0) * 0.25);
-            secretLuckBonus = 1 + ((shopUpgrades.secretLuck || 0) * 0.05);
+            secretLuckBonus = 1 + ((shopUpgrades.secretLuck || 0) * 0.5);
             sellExponent = 0.33 + ((shopUpgrades.sellPower || 0) * 0.33);
             rollBulk = 15 + (shopUpgrades.rollBulk || 0);
             availabilityUnlocked = shopUpgrades.availability || false;
