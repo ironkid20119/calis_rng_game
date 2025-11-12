@@ -340,6 +340,7 @@
       let availabilityUnlocked = false;
       let totalRolls = 0;
       let calisBlessingActive = false;
+      let blessingBoosterActive = false;
       
       // Shop upgrade levels
       let shopUpgrades = {
@@ -347,7 +348,8 @@
         variantLuck: 0,
         rollBulk: 0,
         availability: false,
-        calisBlessing: false
+        calisBlessing: false,
+        blessingBooster: false
       };
       
       const MAX_SLOTS = 25;
@@ -1263,8 +1265,8 @@
         let cooldown = 0;
         if (isSpecial) cooldown = 500;
         else if (absDisplayValue >= 1e12) cooldown = 4000;
-        else if (absDisplayValue >= 1e9) cooldown = 2000;
-        else if (absDisplayValue >= 1e15) cooldown = 7500;
+        else if (absDisplayValue >= 1e10) cooldown = 2000;
+        else if (absDisplayValue >= 1e8) cooldown = 1500;
 
         const inventoryData = {
           variants: invVariants,
