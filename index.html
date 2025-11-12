@@ -1212,8 +1212,8 @@
         let cooldown = 0;
         if (isSpecial) cooldown = 500;
         else if (absDisplayValue >= 1e12) cooldown = 4000;
-        else if (absDisplayValue >= 1e10) cooldown = 2000;
-        else if (absDisplayValue >= 1e8) cooldown = 1000;
+        else if (absDisplayValue >= 1e9) cooldown = 2000;
+        else if (absDisplayValue >= 1e6) cooldown = 100;
 
         const inventoryData = {
           variants: invVariants,
@@ -1229,7 +1229,7 @@
         if (isCooldown) return;
         multiRolls = [];
         // x10 luck, x7.5 variant luck, x5 secret luck for single rolls
-        const roll = rollOnce(10, 7.5, 5);
+        const roll = rollOnce(17.5, 15, 10);
         multiRolls.push(roll.inventoryData);
         
         let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
@@ -1248,7 +1248,7 @@
         
         for (let i = 0; i < rollBulk; i++) {
           // x3.5 luck multipliers for multi-roll
-          const roll = rollOnce(3.5, 3.5, 3.5);
+          const roll = rollOnce(5, 5, 5);
           multiRolls.push(roll.inventoryData);
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, i.toString()).replace(/RANKBUTTON/g, roll.inventoryData ? 
