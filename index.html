@@ -919,6 +919,7 @@
         if (value < 1e33) return 'linear-gradient(45deg, pink, cyan)';
         if (value < 1e36) return 'linear-gradient(0deg, red, black)';
         if (value < 1e39) return 'linear-gradient(90deg, green, pink)';
+        if (value < 1e42) return 'linear-gradient(270deg, red, orange, yellow)';
         return 'linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet)';
       }
 
@@ -951,7 +952,7 @@
         let originalValue = null;
 
         // RNGarbage 1/322,322 - replaces anything
-        if (Math.random() < (1 / 322322) * luckMultiplier * specialLuckBonus) {
+        if (Math.random() < (1 / 322322) * specialLuckBonus) {
           isSpecial = true;
           canHaveVariants = false;
           markDiscovered('specialRanks', 'RNGarbage');
@@ -965,7 +966,7 @@
         }
 
         // RNGod 1/1,000,000 - replaces any 1M+ special rank
-        if (Math.random() < (1 / 1000000) * luckMultiplier * specialLuckBonus) {
+        if (Math.random() < (1 / 1000000) * specialLuckBonus) {
           isSpecial = true;
           canHaveVariants = false;
           markDiscovered('specialRanks', 'RNGod');
@@ -1031,7 +1032,7 @@
         }
 
         // Catastrophic 1/390625
-        if (Math.random() < (1 / 390625) * luckMultiplier * specialLuckBonus) {
+        if (Math.random() < (1 / 390625) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'Catastrophic');
           const invData = {
@@ -1044,7 +1045,7 @@
         }
 
         // Ultra rare 1/75k
-        if (Math.random() < (1 / 750000) * luckMultiplier * specialLuckBonus) {
+        if (Math.random() < (1 / 750000) * specialLuckBonus) {
           isSpecial = true;
           auraCooldown = true;
           canHaveVariants = false;
@@ -1136,7 +1137,7 @@
           if (leafletVariants) resultText += leafletVariants;
           resultText += '<span class="bold" style="color: lightgreen;">You rolled a/an RANKBUTTON (' + leafletDispValue + ')!</span>';
           
-          return { result: resultText, cooldown: 276.3, inventoryData: invData };
+          return { result: resultText, cooldown: 27.63, inventoryData: invData };
         }
 
         // Invisible 1/500,000
@@ -1162,7 +1163,7 @@
             variants: '',
             displayValue: '-1,581,532,333.00',
             rank: 'cali',
-            color: 'magenta'
+            color: 'pink'
           };
           return { result: '<span class="bold" style="color: magenta;">You rolled a/an RANKBUTTON (-1,581,532,333.00)!</span>', cooldown: 5000, inventoryData: invData };
         }
@@ -1502,7 +1503,7 @@
           cooldown = 500;
         } else {
           // Normal cooldown logic (not affected by blessing)
-          if (absDisplayValue >= 1e30) cooldown = 1500;
+          if (absDisplayValue >= 1e33) cooldown = 1500;
         }
 
         const inventoryData = {
@@ -1521,7 +1522,7 @@
         totalRolls++;
         saveShop();
         // x10 luck, x7.5 variant luck, secretLuckBonus for single rolls
-        const roll = rollOnce(17.5, 15, 10 * secretLuckBonus);
+        const roll = rollOnce(25, 20, 3.33 * secretLuckBonus);
         multiRolls.push(roll.inventoryData);
         
         let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
@@ -1541,7 +1542,7 @@
         for (let i = 0; i < rollBulk; i++) {
           totalRolls++;
           // x3.5 luck multipliers for multi-roll
-          const roll = rollOnce(5, 5, 5 * secretLuckBonus);
+          const roll = rollOnce(7.5, 7.5, 3.33 * secretLuckBonus);
           multiRolls.push(roll.inventoryData);
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, i.toString()).replace(/RANKBUTTON/g, roll.inventoryData ? 
