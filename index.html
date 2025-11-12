@@ -1171,13 +1171,13 @@
         let base = Math.random();
         let skewed;
         if (base < 0.5) skewed = 1 + Math.random() * 4.5;
-        else if (base < 0.75) skewed = 10 + Math.random() * 45;
-        else if (base < 0.90) skewed = 100 + Math.random() * 450;
-        else if (base < 0.97) skewed = 1000 + Math.random() * 4500;
-        else if (base < 0.99) skewed = 10000 + Math.random() * 45000;
-        else if (base < 0.997) skewed = 100000 + Math.random() * 450000;
-        else if (base < 0.9995) skewed = 1000000 + Math.random() * 4500000;
-        else skewed = 10000000 + Math.random() * 450000000;
+        else if (base < 0.75) skewed = 10 + Math.random() * 90;
+        else if (base < 0.90) skewed = 100 + Math.random() * 90;
+        else if (base < 0.97) skewed = 1000 + Math.random() * 9000;
+        else if (base < 0.99) skewed = 10000 + Math.random() * 90000;
+        else if (base < 0.997) skewed = 100000 + Math.random() * 900000;
+        else if (base < 0.9995) skewed = 1000000 + Math.random() * 9000000;
+        else skewed = 10000000 + Math.random() * 900000000;
 
         skewed = Math.max(1, skewed);
         if (Math.random() < 1 / 1000) skewed = -1;
