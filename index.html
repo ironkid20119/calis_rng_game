@@ -1381,7 +1381,7 @@
         let cooldown = 0;
         if (isSpecial && !noCooldownRanks.includes(rank)) {
           cooldown = 500;
-        } else if (absDisplayValue >= 1e39) {
+        } else if (absDisplayValue >= 1e45) {
           cooldown = 1500;
         }
 
@@ -1400,7 +1400,7 @@
         multiRolls = [];
         totalRolls++;
         saveShop();
-        const roll = rollOnce(250, 33, 11.11 * secretLuckBonus);
+        const roll = rollOnce(250, 333, 111.1 * secretLuckBonus);
         multiRolls.push(roll.inventoryData);
         
         let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
@@ -1419,7 +1419,7 @@
         
         for (let i = 0; i < rollBulk; i++) {
           totalRolls++;
-          const roll = rollOnce(11.11, 11.11, 5 * secretLuckBonus);
+          const roll = rollOnce(75, 10, 15 * secretLuckBonus);
           multiRolls.push(roll.inventoryData);
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, i.toString()).replace(/RANKBUTTON/g, roll.inventoryData ? 
