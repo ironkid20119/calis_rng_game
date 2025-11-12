@@ -349,7 +349,6 @@
       let specialLuckBonus = 1;
       let generalLuckBonus = 1;
       
-      // Shop upgrade levels
       let shopUpgrades = {
         variantLuck: 0,
         rollBulk: 0,
@@ -366,7 +365,6 @@
       let lastClickTime = {};
       let sellMode = false;
 
-      // All possible ranks, special ranks, secret ranks, variant secrets, and variants
       const ALL_RANKS = ['nothing', 'Common', 'Natural', 'Rare', 'Unnatural', 'Epic', 'Decent', 'Mythical', 'Legendary', 'Unreal', 'Super Rare', 'Eternal', 'Starstruck', 'Paradoxical', 'Iridescent', 'Lux', 'Possible', 'RNGesus', 'CRAZY', 'Supreme', 'DAMN', 'Stupiditium', 'ASCENDED', 'Obscure', 'INFINITE', 'Divine', 'Insurmountable', 'GRAND', 'what.', 'FINALE'];
       
       const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>', 'UNOBTAINABLE', 'Everlasting', 'RNGod', 'Invisible', 'cali', 'RNGarbage'];
@@ -375,15 +373,13 @@
       
       const ALL_VARIANT_SECRETS = ['(Existance)', 'COLOSSAL'];
       
-      const ALL_VARIANTS = ['shiny', 'golden', 'inverse', 'retro', 'bright', 'cosmic', 'GIGANTIC', 'h o r s e', 'eternal', 'dark', 'UNIVERSAL', 'Modified', 'Colorful', 'Gigaconfuscibretrationiminousis', 'Possible', 'Gargantuan', 'Ethereal', 'Limitless'];
+      const ALL_VARIANTS = ['shiny', 'golden', 'inverse', 'retro', 'bright', 'cosmic', 'GIGANTIC', 'h o r s e', 'eternal', 'dark', 'UNIVERSAL', 'Modified', 'Colorful', 'Gigaconfuscibretrationiminousis', 'Possible', 'Gargantuan', 'Ethereal', 'Limitless', 'INFINITUM'];
 
-      // Load discovered items
       function loadDiscovered() {
         const saved = localStorage.getItem('calisRngDiscovered');
         if (saved) {
           try {
             discovered = JSON.parse(saved);
-            // Add new categories if they don't exist
             if (!discovered.secretRanks) discovered.secretRanks = [];
             if (!discovered.variantSecrets) discovered.variantSecrets = [];
           } catch (e) {
@@ -392,12 +388,10 @@
         }
       }
 
-      // Save discovered items
       function saveDiscovered() {
         localStorage.setItem('calisRngDiscovered', JSON.stringify(discovered));
       }
 
-      // Mark as discovered
       function markDiscovered(type, name) {
         if (!discovered[type].includes(name)) {
           discovered[type].push(name);
@@ -405,7 +399,6 @@
         }
       }
 
-      // Render index
       function renderIndex() {
         let html = '<div class="index-category"><h3>Variants</h3>';
         ALL_VARIANTS.forEach(v => {
@@ -427,7 +420,6 @@
 
         html += '<div class="index-category"><h3>Special Ranks</h3>';
         ALL_SPECIAL_RANKS.forEach(r => {
-          // Hide "cali" if availability not unlocked
           if (r === 'cali' && !availabilityUnlocked) {
             html += `<div class="index-item undiscovered">✗ ???</div>`;
           } else {
@@ -500,11 +492,9 @@
         renderInventory();
       });
 
-      // Render shop
       function renderShop() {
         let html = '';
         
-        // Variant Luck Upgrade
         const varCost = Math.floor(100 * Math.pow(1.25, shopUpgrades.variantLuck || 0));
         const varMaxed = (shopUpgrades.variantLuck || 0) >= 20;
         html += `<div class="shop-item">
@@ -515,7 +505,6 @@
           ${varMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('variantLuck')" ${caliCoins < varCost || varMaxed ? 'disabled' : ''}>Buy</button>`}
         </div>`;
         
-        // Roll Bulk Upgrade
         const bulkCost = Math.floor(50 * Math.pow(1.05, shopUpgrades.rollBulk));
         const bulkMaxed = shopUpgrades.rollBulk >= 35;
         html += `<div class="shop-item">
@@ -526,7 +515,6 @@
           ${bulkMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('rollBulk')" ${caliCoins < bulkCost || bulkMaxed ? 'disabled' : ''}>Buy</button>`}
         </div>`;
         
-        // Secret Luck Upgrade
         const secretCost = Math.floor(100 * Math.pow(1.01, shopUpgrades.secretLuck || 0));
         const secretMaxed = (shopUpgrades.secretLuck || 0) >= 280;
         html += `<div class="shop-item">
@@ -537,7 +525,6 @@
           ${secretMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('secretLuck')" ${caliCoins < secretCost || secretMaxed ? 'disabled' : ''}>Buy</button>`}
         </div>`;
         
-        // Sell Power Upgrade
         const sellCost = Math.floor(1000 * Math.pow(1000, shopUpgrades.sellPower || 0));
         const sellMaxed = (shopUpgrades.sellPower || 0) >= 2;
         html += `<div class="shop-item">
@@ -548,7 +535,6 @@
           ${sellMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('sellPower')" ${caliCoins < sellCost || sellMaxed ? 'disabled' : ''}>Buy</button>`}
         </div>`;
         
-        // Special Luck Upgrade
         const specialCost = Math.floor(100 * Math.pow(1.15, shopUpgrades.specialLuck || 0));
         const specialMaxed = (shopUpgrades.specialLuck || 0) >= 100;
         html += `<div class="shop-item">
@@ -559,7 +545,6 @@
           ${specialMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('specialLuck')" ${caliCoins < specialCost || specialMaxed ? 'disabled' : ''}>Buy</button>`}
         </div>`;
         
-        // General Luck Upgrade
         const generalCost = Math.floor(100 * Math.pow(1.05, shopUpgrades.generalLuck || 0));
         const generalMaxed = (shopUpgrades.generalLuck || 0) >= 1000;
         html += `<div class="shop-item">
@@ -570,7 +555,6 @@
           ${generalMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('generalLuck')" ${caliCoins < generalCost || generalMaxed ? 'disabled' : ''}>Buy</button>`}
         </div>`;
         
-        // Availability Upgrade
         html += `<div class="shop-item">
           <h4>Availability</h4>
           <p>Makes ??? rollable</p>
@@ -578,7 +562,6 @@
           ${shopUpgrades.availability ? '<p class="maxed">PURCHASED</p>' : `<button onclick="buyUpgrade('availability')" ${caliCoins < 100000 || shopUpgrades.availability ? 'disabled' : ''}>Buy</button>`}
         </div>`;
         
-        // Cali's Blessing Upgrade
         const blessingBonus = calisBlessingActive && totalRolls > 1 ? 
           (blessingBoosterActive ? 
             Math.min(25, Math.pow(Math.log10(totalRolls), 1.15)) : 
@@ -591,7 +574,6 @@
           ${shopUpgrades.calisBlessing ? '<p class="maxed">PURCHASED</p>' : `<button onclick="buyUpgrade('calisBlessing')" ${caliCoins < 777777 || shopUpgrades.calisBlessing ? 'disabled' : ''}>Buy</button>`}
         </div>`;
         
-        // Cali's Blessing Booster Upgrade
         html += `<div class="shop-item">
           <h4>'Cali's Blessing' Booster</h4>
           <p>Changes blessing formula to log(rolls)^2</p>
@@ -604,7 +586,6 @@
         shopContent.innerHTML = html;
       }
 
-      // Buy upgrade
       window.buyUpgrade = function(type) {
         let cost, maxLevel;
         
@@ -680,10 +661,9 @@
         }
         
         saveShop();
-        renderInventory();
+        renderShop();
       };
 
-      // Load inventory from localStorage
       function loadInventory() {
         const saved = localStorage.getItem('calisRngInventory');
         if (saved) {
@@ -696,7 +676,6 @@
           inventory = [];
         }
         
-        // Load shop data
         const shopSaved = localStorage.getItem('calisRngShop');
         if (shopSaved) {
           try {
@@ -723,13 +702,11 @@
         renderInventory();
       }
 
-      // Save inventory to localStorage
       function saveInventory() {
         localStorage.setItem('calisRngInventory', JSON.stringify(inventory));
         renderInventory();
       }
 
-      // Save shop data
       function saveShop() {
         const shopData = {
           coins: caliCoins,
@@ -742,18 +719,15 @@
         renderShop();
       }
 
-      // Update coins display
       function updateCoinsDisplay() {
         coinsDisplay.textContent = caliCoins.toFixed(2);
         rollMultipleBtn.textContent = `Roll ${rollBulk} Times`;
       }
 
-      // Update roll counter
       function updateRollCounter() {
         rollCounterDisplay.textContent = totalRolls;
       }
 
-      // Render inventory grid
       function renderInventory() {
         inventoryGrid.innerHTML = '';
         inventoryCountDisplay.textContent = inventory.length;
@@ -808,12 +782,10 @@
         }
       }
 
-      // Sell item
       function sellItem(index) {
         if (!inventory[index]) return;
         const item = inventory[index];
         
-        // Check if it's sellable (normal ranks or secret ranks)
         const isNormalRank = ALL_RANKS.includes(item.rank) && 
                             !ALL_SPECIAL_RANKS.includes(item.rank) &&
                             !ALL_VARIANT_SECRETS.includes(item.rank);
@@ -824,18 +796,15 @@
           return;
         }
         
-        // Parse the numeric value
         let numericValue = parseFloat(item.displayValue.replace(/,/g, ''));
         if (isNaN(numericValue)) {
           alert('Cannot sell this item!');
           return;
         }
         
-        // Calculate coins: value^sellExponent
         const coins = Math.pow(Math.abs(numericValue), sellExponent);
         caliCoins += coins;
         
-        // Remove item
         inventory.splice(index, 1);
         saveInventory();
         saveShop();
@@ -843,7 +812,6 @@
         alert(`Sold for ${coins.toFixed(2)} Cali-coins!`);
       }
 
-      // Delete item on double click
       function deleteItem(index) {
         const now = Date.now();
         const key = `slot_${index}`;
@@ -857,7 +825,6 @@
         }
       }
 
-      // Add to inventory
       function addToInventory(item, buttonId) {
         if (!item) return;
         if (inventory.length >= maxSlots) {
@@ -875,7 +842,6 @@
         }
       }
 
-      // Accept from roll
       function acceptRoll(index) {
         addToInventory(multiRolls[index], `rank-btn-${index}`);
       }
@@ -924,12 +890,10 @@
       }
 
       function rollOnce(luckMultiplier = 1, variantLuckMultiplier = 1, secretLuckMultiplier = 1) {
-        // Apply general luck bonus
         luckMultiplier *= generalLuckBonus;
         variantLuckMultiplier *= generalLuckBonus;
         secretLuckMultiplier *= generalLuckBonus;
         
-        // Calculate Cali's Blessing bonus
         let blessingBonus = 0;
         if (calisBlessingActive && totalRolls > 1) {
           if (blessingBoosterActive) {
@@ -939,22 +903,17 @@
           }
         }
         
-        // Apply blessing bonus additively
         luckMultiplier += blessingBonus;
         variantLuckMultiplier += blessingBonus;
         secretLuckMultiplier += blessingBonus;
         
         let isSpecial = false;
-        let auraCooldown = false;
-        let isNegative = false;
-        let isReverted = false;
-        let canHaveVariants = true;
+        let noCooldownRanks = ['???UNKNOWN???', 'nil', 'Lmao'];
         let originalValue = null;
 
-        // RNGarbage 1/322,322 - replaces anything
+        // RNGarbage 1/15,629,519
         if (Math.random() < (1 / 15629519) * specialLuckBonus) {
           isSpecial = true;
-          canHaveVariants = false;
           markDiscovered('specialRanks', 'RNGarbage');
           const invData = {
             variants: '',
@@ -965,10 +924,9 @@
           return { result: '<span class="bold" style="color: brown;">You rolled a/an RANKBUTTON (Bum..)!</span>', cooldown: 2500, inventoryData: invData };
         }
 
-        // RNGod 1/1,000,000 - replaces any 1M+ special rank
+        // RNGod 1/10,000,000
         if (Math.random() < (1 / 10000000) * specialLuckBonus) {
           isSpecial = true;
-          canHaveVariants = false;
           markDiscovered('specialRanks', 'RNGod');
           const invData = {
             variants: '',
@@ -1032,7 +990,7 @@
         }
 
         // Catastrophic 1/390625
-        if (Math.random() < (1 / 3906250) * specialLuckBonus) {
+        if (Math.random() < (1 / 390625) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'Catastrophic');
           const invData = {
@@ -1044,11 +1002,9 @@
           return { result: '<span class="bold" style="color: red;">You rolled a/an RANKBUTTON (-0.50)!</span>', cooldown: 3500, inventoryData: invData };
         }
 
-        // Ultra rare 1/75k
-        if (Math.random() < (1 / 3750000) * specialLuckBonus) {
+        // In im table ?!?!? 1/75k
+        if (Math.random() < (1 / 75000) * specialLuckBonus) {
           isSpecial = true;
-          auraCooldown = true;
-          canHaveVariants = false;
           markDiscovered('specialRanks', 'In im table ?!?!?');
           const invData = {
             variants: '',
@@ -1059,10 +1015,9 @@
           return { result: '<span class="bold">You rolled a/an RANKBUTTON (1einf)!</span>', cooldown: 2500, inventoryData: invData };
         }
 
-        // Ultra rare unknown 1/1234567
+        // ???UNKNOWN??? 1/1234567 - NO COOLDOWN
         if (Math.random() < (1 / 1234567) * luckMultiplier * specialLuckBonus) {
           isSpecial = true;
-          canHaveVariants = false;
           markDiscovered('specialRanks', '???UNKNOWN???');
           const invData = {
             variants: '',
@@ -1070,80 +1025,12 @@
             rank: '???UNKNOWN???',
             color: 'white'
           };
-          return { result: '<span class="bold">You rolled a/an RANKBUTTON (???)!</span>', cooldown: 2500, inventoryData: invData };
+          return { result: '<span class="bold">You rolled a/an RANKBUTTON (???)!</span>', cooldown: 0, inventoryData: invData };
         }
 
-        // Leaflet 1/2,763,000
-        if (Math.random() < (1 / 2763000) * luckMultiplier * specialLuckBonus) {
-          isSpecial = true;
-          let leafletValue = 2763;
-          originalValue = 2763;
-          let leafletDispValue = '2,763.00';
-          let leafletVariants = '';
-          let leafletVariantMultiplier = 1;
-          let leafletDiscoveredVariants = [];
-          
-          // Check for variants on leaflet
-          const variants = [
-            { name: 'shiny', chance: 1 / 100, multiplier: 100 },
-            { name: 'Modified', chance: 1 / 250, multiplier: 250 },
-            { name: 'golden', chance: 1 / 500, multiplier: 500 },
-            { name: 'Colorful', chance: 1 / 777, multiplier: 777 },
-            { name: 'inverse', chance: 1 / 1000, multiplier: 1000 },
-            { name: 'retro', chance: 1 / 2500, multiplier: 2500 },
-            { name: 'bright', chance: 1 / 5000, multiplier: 5000 },
-            { name: 'cosmic', chance: 1 / 10000, multiplier: 10000 },
-            { name: 'GIGANTIC', chance: 1 / 25000, multiplier: 25000 },
-            { name: 'h o r s e', chance: 1 / 30000, multiplier: 1 / 10 },
-            { name: 'eternal', chance: 1 / 50000, multiplier: 50000 },
-            { name: 'dark', chance: 1 / 77777, multiplier: 77777 },
-            { name: 'UNIVERSAL', chance: 1 / 100000, multiplier: 100000 },
-            { name: 'Gargantuan', chance: 1 / 300000, multiplier: 300000 },
-            { name: 'Possible', chance: 1 / 500000, multiplier: 500000 },
-            { name: 'Gigaconfuscibretrationiminousis', chance: 1 / 1000000, multiplier: 1000000 },
-            { name: 'Ethereal', chance: 1 / 2500000, multiplier: 2500000 },
-            { name: 'Limitless', chance: 1 / 10000000, multiplier: 10000000 }
-          ];
-          
-          variants.forEach(v => {
-            if (Math.random() < v.chance * variantLuckMultiplier * variantLuckBonus) {
-              leafletVariantMultiplier *= v.multiplier;
-              leafletVariants += `[${v.name.toUpperCase()}] `;
-              leafletDiscoveredVariants.push(v.name);
-              markDiscovered('variants', v.name);
-            }
-          });
-          
-          if (leafletVariantMultiplier !== 1) {
-            leafletValue *= leafletVariantMultiplier;
-            if (leafletValue >= 1e12) {
-              leafletDispValue = leafletValue.toExponential(4);
-            } else if (leafletValue >= 1000) {
-              leafletDispValue = leafletValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            } else {
-              leafletDispValue = leafletValue.toFixed(2);
-            }
-          }
-          
-          markDiscovered('specialRanks', 'leaflet');
-          const invData = {
-            variants: leafletVariants.trim(),
-            displayValue: leafletDispValue,
-            rank: 'leaflet',
-            color: 'lightgreen'
-          };
-          
-          let resultText = '';
-          if (leafletVariants) resultText += leafletVariants;
-          resultText += '<span class="bold" style="color: lightgreen;">You rolled a/an RANKBUTTON (' + leafletDispValue + ')!</span>';
-          
-          return { result: resultText, cooldown: 27.63, inventoryData: invData };
-        }
-
-        // Invisible 1/500,000
+        // Invisible 1/5,000,000
         if (Math.random() < (1 / 5000000) * specialLuckBonus) {
           isSpecial = true;
-          canHaveVariants = false;
           originalValue = Math.random() * 50000;
           markDiscovered('specialRanks', 'Invisible');
           const invData = {
@@ -1182,25 +1069,24 @@
         skewed = Math.max(1, skewed);
         if (Math.random() < 1 / 1000) skewed = -1;
 
-        // NEGATIVE chance
+        let isNegative = false;
         if (skewed > 1 && Math.random() < 0.075) {
           skewed = -skewed;
           isNegative = true;
         }
 
-        // REVERTED chance
+        let isReverted = false;
         if (Math.random() < 1 / 75 && skewed !== 0 && skewed !== -1) {
-          const originalValue = skewed;
+          const originalVal = skewed;
           skewed = 1 / skewed;
           isReverted = true;
-          var revertedOriginal = originalValue;
+          var revertedOriginal = originalVal;
         }
 
         const baseValue = skewed;
         const absBaseValue = Math.abs(baseValue);
         originalValue = originalValue || baseValue;
 
-        // SECRET RANK system - check before variants
         let secretRank = null;
         let secretMultiplier = 1;
 
@@ -1222,7 +1108,6 @@
           markDiscovered('secretRanks', '🐟');
         }
 
-        // VARIANT system
         const variants = [
           { name: 'shiny', chance: 1 / 100, multiplier: 100 },
           { name: 'Modified', chance: 1 / 250, multiplier: 250 },
@@ -1241,45 +1126,40 @@
           { name: 'Possible', chance: 1 / 500000, multiplier: 500000 },
           { name: 'Gigaconfuscibretrationiminousis', chance: 1 / 1000000, multiplier: 1000000 },
           { name: 'Ethereal', chance: 1 / 2500000, multiplier: 2500000 },
-          { name: 'Limitless', chance: 1 / 10000000, multiplier: 10000000 }
+          { name: 'Limitless', chance: 1 / 10000000, multiplier: 10000000 },
+          { name: 'INFINITUM', chance: 1 / 1e18, multiplier: 1e18 }
         ];
 
         let variantText = '';
         let variantMultiplier = 1;
         let discoveredVariants = [];
 
-        if (canHaveVariants) {
-          variants.forEach(v => {
-            if (Math.random() < v.chance * variantLuckMultiplier * variantLuckBonus) {
-              variantMultiplier *= v.multiplier;
-              variantText += `[${v.name.toUpperCase()}] `;
-              discoveredVariants.push(v.name);
-              markDiscovered('variants', v.name);
-            }
-          });
-        }
+        variants.forEach(v => {
+          if (Math.random() < v.chance * variantLuckMultiplier * variantLuckBonus) {
+            variantMultiplier *= v.multiplier;
+            variantText += `[${v.name.toUpperCase()}] `;
+            discoveredVariants.push(v.name);
+            markDiscovered('variants', v.name);
+          }
+        });
 
-        // Check for variant secrets AFTER variants are determined
         let variantSecret = null;
         let variantSecretMultiplier = 1;
         let removeVariant = null;
 
-        // Check if we have the Gigaconfuscibretrationiminousis variant
-        if (canHaveVariants && discoveredVariants.includes('Gigaconfuscibretrationiminousis')) {
+        if (discoveredVariants.includes('Gigaconfuscibretrationiminousis')) {
           if (Math.random() < 1 / 2.5) {
             variantSecret = 'COLOSSAL';
             variantSecretMultiplier = 25000000;
             removeVariant = 'Gigaconfuscibretrationiminousis';
             markDiscovered('variantSecrets', 'COLOSSAL');
-            isSpecial = true; // Triggers cooldown
+            isSpecial = true;
           }
         }
 
-        // Determine rank based ONLY on baseValue
         let rank = '';
         let displayValue = baseValue;
 
-        // Special ranks
         if (Math.random() < 1 / 989000 * specialLuckBonus) { 
           rank = 'INSANE'; 
           displayValue = 0.989; 
@@ -1313,13 +1193,11 @@
             displayValue = '-error';
             originalValue = -1;
             isSpecial = true;
-            auraCooldown = true;
             markDiscovered('specialRanks', 'NOTHINGNESS');
           } else {
             rank = 'nil';
             originalValue = -1;
-            isSpecial = true; 
-            auraCooldown = true;
+            isSpecial = true;
             markDiscovered('specialRanks', 'nil');
           }
         }
@@ -1331,16 +1209,14 @@
           rank = 'NICE';
           displayValue = 69;
           originalValue = 69;
-          isSpecial = true; 
-          auraCooldown = true;
+          isSpecial = true;
           markDiscovered('specialRanks', 'NICE');
         }
         else if (Math.random() < 1 / 694200 * specialLuckBonus) { 
           rank = 'FUNNY';
           displayValue = 69420;
           originalValue = 69420;
-          isSpecial = true; 
-          auraCooldown = true;
+          isSpecial = true;
           markDiscovered('specialRanks', 'FUNNY');
         }
         else if (absBaseValue < 5) {
@@ -1384,8 +1260,15 @@
         else if (absBaseValue < 1e100) { rank = 'what.'; markDiscovered('ranks', 'what.'); }
         else { rank = 'FINALE'; markDiscovered('ranks', 'FINALE'); }
 
+        if (Math.random() < (1 / 2763000) * luckMultiplier * specialLuckBonus) {
+          isSpecial = true;
+          rank = 'leaflet';
+          displayValue = 2763;
+          originalValue = 2763;
+          markDiscovered('specialRanks', 'leaflet');
+        }
+
         let dispValue;
-        // For special ranks that don't multiply, use originalValue
         if (isSpecial && !['leaflet', 'Common : DIVINITY'].includes(rank) && originalValue !== null) {
           if (typeof originalValue === 'number') {
             if (Math.abs(originalValue) >= 1e12) {
@@ -1414,24 +1297,20 @@
           dispValue = displayValue;
         }
 
-        // Apply variant multiplier only to numeric display values
         if (typeof displayValue !== 'string' && variantMultiplier !== 1) {
           displayValue = displayValue * variantMultiplier;
         }
 
-        // Apply secret rank multiplier
         if (secretRank && typeof displayValue === 'number') {
           displayValue = displayValue * secretMultiplier;
         }
 
-        // Apply variant secret multiplier
         if (variantSecret && typeof displayValue === 'number') {
           displayValue = displayValue * variantSecretMultiplier;
         }
 
         const absDisplayValue = typeof displayValue === 'number' ? Math.abs(displayValue) : 0;
 
-        // Recalculate dispValue after all multipliers
         if (typeof displayValue === 'number') {
           if (isReverted) {
             const exponent = Math.floor(Math.log10(Math.abs(displayValue)));
@@ -1449,13 +1328,11 @@
         let result = '';
         let invVariants = '';
         
-        // Remove the specific variant if variant secret was triggered
         if (removeVariant) {
           const removeIndex = discoveredVariants.indexOf(removeVariant);
           if (removeIndex > -1) {
             discoveredVariants.splice(removeIndex, 1);
           }
-          // Rebuild variantText without the removed variant
           variantText = '';
           discoveredVariants.forEach(v => {
             variantText += `[${v.toUpperCase()}] `;
@@ -1480,10 +1357,9 @@
         if (isReverted) result += '[REVERTED] ';
         const color = getColor(absDisplayValue);
 
-        // Create clickable rank for inventory
         const rankButton = `<button class="rank-button" id="rank-btn-ROLLINDEX" onclick="acceptRoll(ROLLINDEX)">${rank}</button>`;
 
-        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>','UNOBTAINABLE','Everlasting','RNGod','Invisible','cali','RNGarbage'].includes(rank)) {
+        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>','UNOBTAINABLE','Everlasting','RNGod','Invisible','cali','RNGarbage','leaflet'].includes(rank)) {
           if (color.startsWith('linear-gradient')) {
             result += `<span class="bold" style="background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">You rolled a/an RANKBUTTON (${dispValue})!</span>`;
           } else {
@@ -1497,13 +1373,11 @@
           }
         }
 
-        // Cooldown based on display value (with variants) - FIXED
         let cooldown = 0;
-        if (isSpecial) {
+        if (isSpecial && !noCooldownRanks.includes(rank)) {
           cooldown = 500;
-        } else {
-          // Normal cooldown logic (not affected by blessing)
-          if (absDisplayValue >= 1e39) cooldown = 1500;
+        } else if (absDisplayValue >= 1e39) {
+          cooldown = 1500;
         }
 
         const inventoryData = {
@@ -1521,7 +1395,6 @@
         multiRolls = [];
         totalRolls++;
         saveShop();
-        // x10 luck, x7.5 variant luck, secretLuckBonus for single rolls
         const roll = rollOnce(25, 20, 3.33 * secretLuckBonus);
         multiRolls.push(roll.inventoryData);
         
@@ -1541,7 +1414,6 @@
         
         for (let i = 0; i < rollBulk; i++) {
           totalRolls++;
-          // x3.5 luck multipliers for multi-roll
           const roll = rollOnce(7.5, 7.5, 3.33 * secretLuckBonus);
           multiRolls.push(roll.inventoryData);
           
@@ -1560,7 +1432,6 @@
 
       window.acceptRoll = acceptRoll;
 
-      // Initialize
       loadDiscovered();
       loadInventory();
     </script>
