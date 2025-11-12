@@ -952,7 +952,7 @@
         let originalValue = null;
 
         // RNGarbage 1/322,322 - replaces anything
-        if (Math.random() < (1 / 322322) * specialLuckBonus) {
+        if (Math.random() < (1 / 15629519) * specialLuckBonus) {
           isSpecial = true;
           canHaveVariants = false;
           markDiscovered('specialRanks', 'RNGarbage');
@@ -966,7 +966,7 @@
         }
 
         // RNGod 1/1,000,000 - replaces any 1M+ special rank
-        if (Math.random() < (1 / 1000000) * specialLuckBonus) {
+        if (Math.random() < (1 / 10000000) * specialLuckBonus) {
           isSpecial = true;
           canHaveVariants = false;
           markDiscovered('specialRanks', 'RNGod');
@@ -1032,7 +1032,7 @@
         }
 
         // Catastrophic 1/390625
-        if (Math.random() < (1 / 390625) * specialLuckBonus) {
+        if (Math.random() < (1 / 3906250) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'Catastrophic');
           const invData = {
@@ -1045,7 +1045,7 @@
         }
 
         // Ultra rare 1/75k
-        if (Math.random() < (1 / 750000) * specialLuckBonus) {
+        if (Math.random() < (1 / 3750000) * specialLuckBonus) {
           isSpecial = true;
           auraCooldown = true;
           canHaveVariants = false;
@@ -1141,7 +1141,7 @@
         }
 
         // Invisible 1/500,000
-        if (Math.random() < (1 / 5000000) * luckMultiplier * specialLuckBonus) {
+        if (Math.random() < (1 / 5000000) * specialLuckBonus) {
           isSpecial = true;
           canHaveVariants = false;
           originalValue = Math.random() * 50000;
@@ -1280,7 +1280,7 @@
         let displayValue = baseValue;
 
         // Special ranks
-        if (Math.random() < 1 / 98900 * specialLuckBonus) { 
+        if (Math.random() < 1 / 989000 * specialLuckBonus) { 
           rank = 'INSANE'; 
           displayValue = 0.989; 
           originalValue = 0.989;
