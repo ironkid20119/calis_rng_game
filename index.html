@@ -1556,6 +1556,9 @@
         if (value < 1e51) return 'linear-gradient(75deg, red, pink, red, pink)';
         if (value < 1e54) return 'linear-gradient(90deg, red, pink, white, pink, red)';
         if (value < 1e57) return 'linear-gradient(150deg, cyan, green, red, white)';
+        if (value < 1e60) return 'linear-gradient(90deg, purple, black, purple, black, purple, black, purple)';
+        if (value < 1e63) return 'linear-gradient(90deg, blue, cyan, blue, cyan)';
+        if (value < 1e66) return 'linear-gradient(90deg, red, orange, red, orange)';
         return 'linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet)';
       }
 
@@ -1594,7 +1597,7 @@
         }
 
         // RNGarbage 1/15,629,519
-        if (Math.random() < (1 / 156295190) * specialLuckBonus * luckMultiplier) {
+        if (Math.random() < (1 / 15629519) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'RNGarbage');
           const invData = {
@@ -1607,7 +1610,7 @@
         }
 
         // RNGod 1/50,000,000
-        if (Math.random() < (1 / 50000000) * specialLuckBonus * luckMultiplier) {
+        if (Math.random() < (1 / 1000000) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'RNGod');
           const invData = {
@@ -1620,7 +1623,7 @@
         }
 
         // Everlasting 1/575,765,100
-        if (Math.random() < (1 / 575765100) * luckMultiplier * specialLuckBonus) {
+        if (Math.random() < (1 / 575765100) * specialluckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'Everlasting');
           const invData = {
@@ -1633,7 +1636,7 @@
         }
 
         // UNOBTAINABLE 1/1,000,000,000
-        if (Math.random() < (1 / 1000000000) * luckMultiplier * specialLuckBonus) {
+        if (Math.random() < (1 / 1000000000) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'UNOBTAINABLE');
           const invData = {
@@ -1646,7 +1649,7 @@
         }
 
         // Legacy FINALE 1/75,000,000
-        if (Math.random() < (1 / 75000000) * luckMultiplier * specialLuckBonus) {
+        if (Math.random() < (1 / 75000000) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'Legacy FINALE');
           const invData = {
@@ -1658,8 +1661,8 @@
           return { result: '<span class="bold" style="color: gold;">You rolled a/an RANKBUTTON (1.0000e+10)!</span>', cooldown: 5000, inventoryData: invData };
         }
 
-        // <(ETERNAL DAWN)> 1/10,000,000
-        if (Math.random() < (1 / 77777777) * luckMultiplier * specialLuckBonus) {
+        // <(ETERNAL DAWN)> 1/77,777,777
+        if (Math.random() < (1 / 77777777) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', '<(ETERNAL DAWN)>');
           const invData = {
@@ -1671,8 +1674,8 @@
           return { result: '<span class="bold" style="color: purple;">You rolled a/an RANKBUTTON (-777,777,777.78)!</span>', cooldown: 4500, inventoryData: invData };
         }
 
-        // Catastrophic 1/39062500
-        if (Math.random() < (1 / 39062500) * specialLuckBonus) {
+        // Catastrophic 1/3906250
+        if (Math.random() < (1 / 3906250) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'Catastrophic');
           const invData = {
@@ -1684,8 +1687,8 @@
           return { result: '<span class="bold" style="color: red;">You rolled a/an RANKBUTTON (-0.50)!</span>', cooldown: 3500, inventoryData: invData };
         }
 
-        // In im table ?!?!? 1/37.5m
-        if (Math.random() < (1 / 37500000) * specialLuckBonus) {
+        // In im table ?!?!? 1/3.75m
+        if (Math.random() < (1 / 3750000) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'In im table ?!?!?');
           const invData = {
@@ -1697,8 +1700,8 @@
           return { result: '<span class="bold">You rolled a/an RANKBUTTON (1einf)!</span>', cooldown: 2500, inventoryData: invData };
         }
 
-        // ???UNKNOWN??? 1/12345678 - NO COOLDOWN
-        if (Math.random() < (1 / 12345678) * luckMultiplier) {
+        // ???UNKNOWN??? 1/1234567 - NO COOLDOWN
+        if (Math.random() < (1 / 1234567) * luckMultiplier) {
           isSpecial = true;
           markDiscovered('specialRanks', '???UNKNOWN???');
           const invData = {
@@ -1710,8 +1713,8 @@
           return { result: '<span class="bold">You rolled a/an RANKBUTTON (???)!</span>', cooldown: 0, inventoryData: invData };
         }
 
-        // Invisible 1/5000000
-        if (Math.random() < (1 / 50000000) * specialLuckBonus) {
+        // Invisible 1/500000
+        if (Math.random() < (1 / 5000000) * specialLuckBonus) {
           isSpecial = true;
           originalValue = Math.random() * 50000000;
           markDiscovered('specialRanks', 'Invisible');
@@ -1892,14 +1895,14 @@
           rank = 'nothing';
           markDiscovered('ranks', 'nothing');
         }
-        else if (Math.random() < 1 / 6900000 * specialLuckBonus * luckMultiplier) { 
+        else if (Math.random() < 1 / 690000 * specialLuckBonus) { 
           rank = 'NICE';
           displayValue = 69;
           originalValue = 69;
           isSpecial = true;
           markDiscovered('specialRanks', 'NICE');
         }
-        else if (Math.random() < 1 / 69420000 * specialLuckBonus * luckMultiplier) { 
+        else if (Math.random() < 1 / 6942000 * specialLuckBonus) { 
           rank = 'FUNNY';
           displayValue = 69420;
           originalValue = 69420;
@@ -1907,7 +1910,7 @@
           markDiscovered('specialRanks', 'FUNNY');
         }
         else if (absBaseValue < 5) {
-          if (Math.random() < 1 / 3333333 * specialLuckBonus * luckMultiplier) { 
+          if (Math.random() < 1 / 3333333 * specialLuckBonus) { 
             rank = 'Common : DIVINITY'; 
             displayValue *= 5e5;
             isSpecial = true;
@@ -1952,7 +1955,7 @@
         else if (absBaseValue < 1e150) { rank = 'what.'; markDiscovered('ranks', 'what.'); }
         else { rank = 'FINALE'; markDiscovered('ranks', 'FINALE'); }
 
-        if (Math.random() < (1 / 27630000) * luckMultiplier * specialLuckBonus) {
+        if (Math.random() < (1 / 27630) {
           isSpecial = true;
           rank = 'leaflet';
           displayValue = 2763;
