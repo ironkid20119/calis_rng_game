@@ -1671,8 +1671,8 @@
           return { result: '<span class="bold" style="color: purple;">You rolled a/an RANKBUTTON (-777,777,777.78)!</span>', cooldown: 4500, inventoryData: invData };
         }
 
-        // Catastrophic 1/3906250
-        if (Math.random() < (1 / 39062500) * specialLuckBonus * luckMultiplier) {
+        // Catastrophic 1/39062500
+        if (Math.random() < (1 / 39062500) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'Catastrophic');
           const invData = {
@@ -1685,7 +1685,7 @@
         }
 
         // In im table ?!?!? 1/37.5m
-        if (Math.random() < (1 / 37500000) * specialLuckBonus * luckMultiplier) {
+        if (Math.random() < (1 / 37500000) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'In im table ?!?!?');
           const invData = {
@@ -1698,7 +1698,7 @@
         }
 
         // ???UNKNOWN??? 1/12345678 - NO COOLDOWN
-        if (Math.random() < (1 / 12345678) * luckMultiplier * specialLuckBonus) {
+        if (Math.random() < (1 / 12345678) * luckMultiplier) {
           isSpecial = true;
           markDiscovered('specialRanks', '???UNKNOWN???');
           const invData = {
@@ -1711,9 +1711,9 @@
         }
 
         // Invisible 1/5000000
-        if (Math.random() < (1 / 50000000) * specialLuckBonus * luckMultiplier) {
+        if (Math.random() < (1 / 50000000) * specialLuckBonus) {
           isSpecial = true;
-          originalValue = Math.random() * 50000;
+          originalValue = Math.random() * 50000000;
           markDiscovered('specialRanks', 'Invisible');
           const invData = {
             variants: '',
@@ -1725,7 +1725,7 @@
         }
 
         // cali 1/10,000,000 (only if availability unlocked)
-        if (availabilityUnlocked && Math.random() < (1 / 10000000) * luckMultiplier * specialLuckBonus) {
+        if (availabilityUnlocked && Math.random() < (1 / 10000000) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'cali');
           const invData = {
@@ -1847,14 +1847,14 @@
         let rank = '';
         let displayValue = baseValue;
 
-        if (Math.random() < 1 / 9890000 * specialLuckBonus * luckMultiplier) { 
+        if (Math.random() < 1 / 9890000 * specialLuckBonus) { 
           rank = 'INSANE'; 
           displayValue = 0.989; 
           originalValue = 0.989;
           isSpecial = true;
           markDiscovered('specialRanks', 'INSANE');
         }
-        else if (Math.random() < 1 / 1500000 * specialLuckBonus * luckMultiplier) { 
+        else if (Math.random() < 1 / 15000 * specialLuckBonus) { 
           rank = 'Lmao'; 
           displayValue = 0.1;
           originalValue = 0.1;
@@ -1867,7 +1867,7 @@
           isSpecial = true;
           markDiscovered('specialRanks', 'PERFECTIONIST');
         }
-        else if (Math.random() < 1 / 888888 * specialLuckBonus * luckMultiplier) { 
+        else if (Math.random() < 1 / 888888 * specialLuckBonus) { 
           rank = "Imaginary"; 
           displayValue = "0.1i";
           originalValue = 0.1;
