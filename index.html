@@ -106,7 +106,7 @@
 
       .inventory-grid {
         display: grid;
-        grid-template-columns: repeat(5, 50fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: 5px;
         margin-top: 15px;
       }
@@ -280,6 +280,179 @@
         font-size: 18px;
         color: #d4af37;
       }
+
+      #toggleMerchant {
+        background-color: #4ade80;
+        color: #000;
+      }
+
+      #toggleMerchant:hover {
+        background-color: #5ef090;
+      }
+
+      #toggleItemInventory {
+        background-color: #a855f7;
+      }
+
+      #toggleItemInventory:hover {
+        background-color: #b865ff;
+      }
+
+      .merchant-section {
+        margin-top: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+      }
+
+      .merchant-timer {
+        font-size: 16px;
+        color: #4ade80;
+        margin-bottom: 15px;
+      }
+
+      .merchant-items {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .merchant-item {
+        background: rgba(0, 0, 0, 0.4);
+        padding: 15px;
+        border-radius: 5px;
+        border: 2px solid #4ade80;
+      }
+
+      .merchant-item h4 {
+        margin: 0 0 10px 0;
+        color: #4ade80;
+      }
+
+      .item-inventory-section {
+        margin-top: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+      }
+
+      .item-slot {
+        background: rgba(0, 0, 0, 0.3);
+        border: 2px solid #a855f7;
+        border-radius: 5px;
+        padding: 10px;
+        min-height: 50px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .item-slot:hover {
+        background: rgba(0, 0, 0, 0.5);
+        border-color: #b865ff;
+      }
+
+      .item-slot.empty {
+        cursor: default;
+        opacity: 0.5;
+      }
+
+      .item-slot.empty:hover {
+        background: rgba(0, 0, 0, 0.3);
+        border-color: #a855f7;
+      }
+
+      .item-name {
+        font-weight: 700;
+        font-size: 12px;
+        margin-bottom: 5px;
+      }
+
+      .item-multiplier {
+        font-size: 10px;
+        color: #ffd700;
+      }
+
+      #togglePVP {
+        background-color: #ef4444;
+      }
+
+      #togglePVP:hover {
+        background-color: #ff5555;
+      }
+
+      .pvp-section {
+        margin-top: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+      }
+
+      .pvp-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .pvp-stat {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 10px;
+        border-radius: 5px;
+        border: 2px solid #ef4444;
+      }
+
+      .pvp-stat h4 {
+        margin: 0 0 5px 0;
+        color: #ef4444;
+      }
+
+      .pvp-results {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 15px;
+        min-height: 100px;
+      }
+
+      .pvp-upgrades {
+        margin-top: 20px;
+      }
+
+      #rollSpecialLuck {
+        background-color: #f59e0b;
+      }
+
+      #rollSpecialLuck:hover:not(:disabled) {
+        background-color: #fbbf24;
+      }
+
+      .music-control {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 10px;
+        border-radius: 10px;
+        border: 2px solid #c71585;
+      }
+
+      .music-control button {
+        padding: 5px 10px;
+        font-size: 12px;
+        margin: 2px;
+      }
+
+      .music-status {
+        font-size: 10px;
+        margin-bottom: 5px;
+        color: #4ade80;
+      }
     </style>
   </head>
   <body>
@@ -290,9 +463,13 @@
       </div>
       <button id="rollOnceBtn">Roll Once</button>
       <button id="rollMultipleBtn">Roll 15 Times</button>
+      <button id="rollSpecialLuck">Roll Once (x10000 Special Luck)</button>
       <button id="toggleInventory">Toggle Inventory</button>
       <button id="toggleIndex">Toggle Index</button>
       <button id="toggleShop">Toggle Shop</button>
+      <button id="toggleMerchant">Toggle Merchant</button>
+      <button id="toggleItemInventory">Toggle Item Inventory</button>
+      <button id="togglePVP">Toggle PVP</button>
       <button id="toggleSellMode">Sell Mode: OFF</button>
 
       <div id="results"></div>
@@ -308,33 +485,101 @@
         <div id="shopContent"></div>
       </div>
 
+      <div class="merchant-section" id="merchantSection" style="display: none;">
+        <h2>Merchant</h2>
+        <div class="coins-display">Cali-coins: <span id="merchantCoinsDisplay">0</span></div>
+        <div class="merchant-timer">Next restock in: <span id="merchantTimer">30</span>s</div>
+        <div class="merchant-items" id="merchantItems"></div>
+      </div>
+
+      <div class="item-inventory-section" id="itemInventorySection" style="display: none;">
+        <h2>Item Inventory (<span id="itemInventoryCount">0</span>/50 slots)</h2>
+        <div class="inventory-grid" id="itemInventoryGrid"></div>
+      </div>
+
+      <div class="pvp-section" id="pvpSection" style="display: none;">
+        <h2>PVP Arena</h2>
+        <div class="pvp-stats">
+          <div class="pvp-stat">
+            <h4>PVP Coins</h4>
+            <p id="pvpCoinsDisplay">0</p>
+          </div>
+          <div class="pvp-stat">
+            <h4>Win Streak</h4>
+            <p id="winStreakDisplay">0</p>
+          </div>
+          <div class="pvp-stat">
+            <h4>Total Wins</h4>
+            <p id="totalWinsDisplay">0</p>
+          </div>
+        </div>
+        <button id="pvpRollBtn">Roll Against Opponent</button>
+        <div class="pvp-results" id="pvpResults"></div>
+        <div class="pvp-upgrades">
+          <h3>PVP Upgrades</h3>
+          <div id="pvpUpgradesContent"></div>
+        </div>
+      </div>
+
       <div class="index-section" id="indexSection" style="display: none;">
         <h2>Discovery Index</h2>
         <div id="indexContent"></div>
       </div>
     </div>
 
+    <div class="music-control">
+      <div class="music-status" id="musicStatus">Music: Not Started</div>
+      <button id="startMusic">Start Music</button>
+      <button id="toggleMusic" style="display: none;">Pause</button>
+      <button id="skipMusic" style="display: none;">Skip</button>
+    </div>
+
     <script>
       const resultsDiv = document.getElementById('results');
       const rollOnceBtn = document.getElementById('rollOnceBtn');
       const rollMultipleBtn = document.getElementById('rollMultipleBtn');
+      const rollSpecialLuckBtn = document.getElementById('rollSpecialLuck');
       const toggleInventoryBtn = document.getElementById('toggleInventory');
       const toggleIndexBtn = document.getElementById('toggleIndex');
       const toggleShopBtn = document.getElementById('toggleShop');
+      const toggleMerchantBtn = document.getElementById('toggleMerchant');
+      const toggleItemInventoryBtn = document.getElementById('toggleItemInventory');
+      const togglePVPBtn = document.getElementById('togglePVP');
       const toggleSellModeBtn = document.getElementById('toggleSellMode');
       const inventorySection = document.getElementById('inventorySection');
       const indexSection = document.getElementById('indexSection');
       const shopSection = document.getElementById('shopSection');
+      const merchantSection = document.getElementById('merchantSection');
+      const itemInventorySection = document.getElementById('itemInventorySection');
+      const pvpSection = document.getElementById('pvpSection');
+      const pvpRollBtn = document.getElementById('pvpRollBtn');
       const indexContent = document.getElementById('indexContent');
       const shopContent = document.getElementById('shopContent');
+      const merchantItems = document.getElementById('merchantItems');
+      const itemInventoryGrid = document.getElementById('itemInventoryGrid');
+      const pvpResults = document.getElementById('pvpResults');
+      const pvpUpgradesContent = document.getElementById('pvpUpgradesContent');
       const coinsDisplay = document.getElementById('coinsDisplay');
+      const merchantCoinsDisplay = document.getElementById('merchantCoinsDisplay');
       const inventoryCountDisplay = document.getElementById('inventoryCount');
+      const itemInventoryCountDisplay = document.getElementById('itemInventoryCount');
       const maxSlotsDisplay = document.getElementById('maxSlotsDisplay');
       const inventoryGrid = document.getElementById('inventoryGrid');
       const rollCounterDisplay = document.getElementById('rollCounter');
+      const merchantTimer = document.getElementById('merchantTimer');
+      const pvpCoinsDisplay = document.getElementById('pvpCoinsDisplay');
+      const winStreakDisplay = document.getElementById('winStreakDisplay');
+      const totalWinsDisplay = document.getElementById('totalWinsDisplay');
+      const startMusicBtn = document.getElementById('startMusic');
+      const toggleMusicBtn = document.getElementById('toggleMusic');
+      const skipMusicBtn = document.getElementById('skipMusic');
+      const musicStatus = document.getElementById('musicStatus');
+      
       let isCooldown = false;
+      let isPVPCooldown = false;
       let multiRolls = [];
       let inventory = [];
+      let itemInventory = [];
       let discovered = { ranks: [], specialRanks: [], secretRanks: [], variantSecrets: [], variants: [] };
       let caliCoins = 0;
       let maxSlots = 250;
@@ -348,6 +593,16 @@
       let secretLuckBonus = 1;
       let specialLuckBonus = 1;
       let generalLuckBonus = 1;
+      let merchantTimeLeft = 30;
+      let merchantStock = [];
+      let pvpCoins = 0;
+      let winStreak = 0;
+      let totalWins = 0;
+      let rngExponent = 1;
+      let playedSongs = [];
+      let currentAudio = null;
+      let musicPaused = false;
+      let musicStarted = false;
       
       let shopUpgrades = {
         variantLuck: 0,
@@ -361,19 +616,378 @@
         blessingBooster: false
       };
       
-      const MAX_SLOTS = 25;
+      let pvpUpgrades = {
+        bulkRoll: 0,
+        rngExponent: 0
+      };
+      
       let lastClickTime = {};
       let sellMode = false;
 
-      const ALL_RANKS = ['nothing', 'Common', 'Natural', 'Rare', 'Unnatural', 'Epic', 'Decent', 'Mythical', 'Legendary', 'Unreal', 'Super Rare', 'Eternal', 'Starstruck', 'Paradoxical', 'Iridescent', 'Lux', 'Possible', 'RNGesus', 'CRAZY', 'Supreme', 'DAMN', 'Stupiditium', 'ASCENDED', 'Obscure', 'INFINITE', 'Divine', 'Insurmountable', 'GRAND', 'what.', 'FINALE'];
+      const ALL_RANKS = ['nothing', 'Common', 'Natural', 'Rare', 'Unnatural', 'Epic', 'Decent', 'Mythical', 'Legendary', 'Unreal', 'Super Rare', 'Eternal', 'Starstruck', 'Paradoxical', 'Iridescent', 'Lux', 'Possible', 'RNGesus', 'CRAZY', 'Supreme', 'DAMN', 'Stupiditium', 'ASCENDED', 'Obscure', 'INFINITE', 'Divine', 'Insurmountable', 'GRAND', 'what.', 'FINALE', 'Microb', 'Attainable', 'Directional', 'Limitless', 'Endless'];
       
-      const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>', 'UNOBTAINABLE', 'Everlasting', 'RNGod', 'Invisible', 'cali', 'RNGarbage'];
+      const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>', 'UNOBTAINABLE', 'Everlasting', 'RNGod', 'Invisible', 'cali', 'RNGarbage', 'Cheesium'];
       
       const ALL_SECRET_RANKS = ['🐟', 'Destiny', '🌳', 'ULTIMATE'];
       
       const ALL_VARIANT_SECRETS = ['(Existance)', 'COLOSSAL'];
       
-      const ALL_VARIANTS = ['shiny', 'golden', 'inverse', 'retro', 'bright', 'cosmic', 'GIGANTIC', 'h o r s e', 'eternal', 'dark', 'UNIVERSAL', 'Modified', 'Colorful', 'Gigaconfuscibretrationiminousis', 'Possible', 'Gargantuan', 'Ethereal', 'Limitless', 'INFINITUM'];
+      const ALL_VARIANTS = ['shiny', 'golden', 'inverse', 'retro', 'bright', 'cosmic', 'GIGANTIC', 'h o r s e', 'eternal', 'dark', 'UNIVERSAL', 'Modified', 'Colorful', 'Gigaconfuscibretrationiminousis', 'Possible', 'Gargantuan', 'Ethereal', 'Limitless', 'INFINITUM', 'evil', 'Light', 'void.', 'Unhonored', 'REALITY'];
+
+      // Using royalty-free music from various sources
+      const MUSIC_URLS = [
+        'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', // Placeholder - will use generated tones
+      ];
+
+      function initMusic() {
+        // Create an audio context for generating simple background tones
+        // This avoids external dependencies and copyright issues
+      }
+
+      function playNextSong() {
+        if (musicPaused || !musicStarted) return;
+        
+        // Generate a simple melodic loop using Web Audio API
+        try {
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25]; // C major scale
+          let currentNote = 0;
+          let noteInterval;
+          
+          function playNote() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = notes[currentNote];
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+            
+            currentNote = (currentNote + Math.floor(Math.random() * 3) + 1) % notes.length;
+          }
+          
+          noteInterval = setInterval(playNote, 500);
+          musicStatus.textContent = 'Music: Playing';
+          
+          // Store cleanup function
+          window.musicCleanup = () => {
+            clearInterval(noteInterval);
+            audioContext.close();
+          };
+        } catch (e) {
+          console.log('Music generation failed:', e);
+          musicStatus.textContent = 'Music: Error';
+        }
+      }
+
+      startMusicBtn.addEventListener('click', () => {
+        musicStarted = true;
+        startMusicBtn.style.display = 'none';
+        toggleMusicBtn.style.display = 'inline-block';
+        skipMusicBtn.style.display = 'inline-block';
+        playNextSong();
+      });
+
+      toggleMusicBtn.addEventListener('click', () => {
+        if (musicPaused) {
+          musicPaused = false;
+          toggleMusicBtn.textContent = 'Pause';
+          playNextSong();
+        } else {
+          musicPaused = true;
+          toggleMusicBtn.textContent = 'Play';
+          if (window.musicCleanup) window.musicCleanup();
+          musicStatus.textContent = 'Music: Paused';
+        }
+      });
+
+      skipMusicBtn.addEventListener('click', () => {
+        if (window.musicCleanup) window.musicCleanup();
+        playNextSong();
+      });
+
+      function generateMerchantStock() {
+        merchantStock = [];
+        
+        // Generate 10 items guaranteed
+        for (let i = 0; i < 10; i++) {
+          const rand = Math.random();
+          
+          if (rand < 1/10) {
+            // Cheese
+            merchantStock.push({
+              name: 'Cheese',
+              cost: 69,
+              description: '1/5.55 chance to force a special roll',
+              type: 'cheese'
+            });
+          } else if (rand < 1/10 + 1/100) {
+            // Special Booster
+            const multiplier = Math.pow(Math.random(), -2);
+            const cost = Math.floor(Math.pow(multiplier, 1.25));
+            merchantStock.push({
+              name: 'Special Booster',
+              cost: cost,
+              description: `Multiplies special luck by ${multiplier.toFixed(2)}x`,
+              multiplier: multiplier,
+              type: 'specialBooster'
+            });
+          } else {
+            // Regular Booster
+            const multiplier = Math.pow(Math.random(), -2);
+            const cost = Math.floor(Math.pow(multiplier, 1.25));
+            merchantStock.push({
+              name: 'Booster',
+              cost: cost,
+              description: `Multiplies luck by ${multiplier.toFixed(2)}x`,
+              multiplier: multiplier,
+              type: 'booster'
+            });
+          }
+        }
+      }
+
+      function renderMerchant() {
+        merchantCoinsDisplay.textContent = caliCoins.toFixed(2);
+        merchantItems.innerHTML = '';
+        
+        if (merchantStock.length === 0) {
+          merchantItems.innerHTML = '<p style="grid-column: 1 / -1;">No items in stock</p>';
+          return;
+        }
+        
+        merchantStock.forEach((item, index) => {
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'merchant-item';
+          itemDiv.innerHTML = `
+            <h4>${item.name}</h4>
+            <p>${item.description}</p>
+            <p>Cost: ${item.cost} coins</p>
+            <button onclick="buyMerchantItem(${index})" ${caliCoins < item.cost || itemInventory.length >= 50 ? 'disabled' : ''}>Buy</button>
+          `;
+          merchantItems.appendChild(itemDiv);
+        });
+      }
+
+      window.buyMerchantItem = function(index) {
+        const item = merchantStock[index];
+        if (!item || caliCoins < item.cost || itemInventory.length >= 50) return;
+        
+        caliCoins -= item.cost;
+        itemInventory.push(item);
+        merchantStock.splice(index, 1);
+        
+        saveAll();
+        renderMerchant();
+        renderItemInventory();
+      };
+
+      function renderItemInventory() {
+        itemInventoryGrid.innerHTML = '';
+        itemInventoryCountDisplay.textContent = itemInventory.length;
+        
+        for (let i = 0; i < 50; i++) {
+          const slot = document.createElement('div');
+          
+          if (itemInventory[i]) {
+            const item = itemInventory[i];
+            slot.className = 'item-slot';
+            
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'item-name';
+            nameDiv.textContent = item.name;
+            slot.appendChild(nameDiv);
+            
+            if (item.multiplier) {
+              const multDiv = document.createElement('div');
+              multDiv.className = 'item-multiplier';
+              multDiv.textContent = `${item.multiplier.toFixed(2)}x`;
+              slot.appendChild(multDiv);
+            }
+            
+            slot.onclick = () => useItem(i);
+          } else {
+            slot.className = 'item-slot empty';
+            slot.textContent = 'Empty';
+          }
+          
+          itemInventoryGrid.appendChild(slot);
+        }
+      }
+
+      function useItem(index) {
+        const item = itemInventory[index];
+        if (!item) return;
+        
+        if (item.type === 'cheese') {
+          if (Math.random() < 1/5.55) {
+            totalRolls++;
+            const roll = rollOnce(1, 1, 1, true);
+            multiRolls = [roll.inventoryData];
+            
+            let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, 
+              `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>`);
+            
+            resultsDiv.innerHTML = displayResult;
+            if (roll.cooldown > 0) setCooldown(roll.cooldown);
+          } else {
+            resultsDiv.innerHTML = '<span style="color: yellow;">The cheese did nothing...</span>';
+          }
+        } else if (item.type === 'booster') {
+          totalRolls++;
+          const roll = rollOnce(item.multiplier, item.multiplier, item.multiplier);
+          multiRolls = [roll.inventoryData];
+          
+          let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, 
+            `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>`);
+          
+          resultsDiv.innerHTML = '<span style="color: gold;">BOOSTER ACTIVATED! (Luck x' + item.multiplier.toFixed(2) + ')</span><br>' + displayResult;
+          if (roll.cooldown > 0) setCooldown(roll.cooldown);
+        } else if (item.type === 'specialBooster') {
+          totalRolls++;
+          const roll = rollOnce(1, 1, 1);
+          // Apply special luck boost directly to special ranks
+          specialLuckBonus *= item.multiplier;
+          multiRolls = [roll.inventoryData];
+          
+          let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, 
+            `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>`);
+          
+          resultsDiv.innerHTML = '<span style="color: #ff1493;">SPECIAL BOOSTER ACTIVATED! (Special Luck x' + item.multiplier.toFixed(2) + ')</span><br>' + displayResult;
+          
+          // Reset special luck after roll
+          specialLuckBonus = 1 + ((shopUpgrades.specialLuck || 0) * 0.1);
+          
+          if (roll.cooldown > 0) setCooldown(roll.cooldown);
+        }
+        
+        itemInventory.splice(index, 1);
+        saveAll();
+        renderItemInventory();
+      }
+
+      setInterval(() => {
+        merchantTimeLeft--;
+        merchantTimer.textContent = merchantTimeLeft;
+        
+        if (merchantTimeLeft <= 0) {
+          merchantTimeLeft = 30;
+          generateMerchantStock();
+          renderMerchant();
+        }
+      }, 1000);
+
+      function renderPVPUpgrades() {
+        let html = '';
+        
+        const bulkCost = Math.floor(10 * Math.pow(1.5, pvpUpgrades.bulkRoll));
+        const bulkMaxed = pvpUpgrades.bulkRoll >= 5;
+        html += `<div class="shop-item">
+          <h4>+10 Bulk Roll</h4>
+          <p>Current: Roll ${rollBulk} Times</p>
+          <p>Cost: ${bulkCost} PVP Coins</p>
+          <p>Upgrades: ${pvpUpgrades.bulkRoll}/5</p>
+          ${bulkMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyPVPUpgrade('bulkRoll')" ${pvpCoins < bulkCost || bulkMaxed ? 'disabled' : ''}>Buy</button>`}
+        </div>`;
+        
+        const expCost = Math.floor(5 * Math.pow(2, pvpUpgrades.rngExponent));
+        const expMaxed = pvpUpgrades.rngExponent >= 5;
+        html += `<div class="shop-item">
+          <h4>+0.1 RNG Exponent</h4>
+          <p>Current: ^${rngExponent.toFixed(1)}</p>
+          <p>Cost: ${expCost} PVP Coins</p>
+          <p>Upgrades: ${pvpUpgrades.rngExponent}/5</p>
+          ${expMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyPVPUpgrade('rngExponent')" ${pvpCoins < expCost || expMaxed ? 'disabled' : ''}>Buy</button>`}
+        </div>`;
+        
+        pvpUpgradesContent.innerHTML = html;
+      }
+
+      window.buyPVPUpgrade = function(type) {
+        if (type === 'bulkRoll') {
+          const cost = Math.floor(10 * Math.pow(1.5, pvpUpgrades.bulkRoll));
+          if (pvpCoins >= cost && pvpUpgrades.bulkRoll < 5) {
+            pvpCoins -= cost;
+            pvpUpgrades.bulkRoll++;
+            rollBulk += 10;
+            saveAll();
+            renderPVPUpgrades();
+            updatePVPDisplay();
+          }
+        } else if (type === 'rngExponent') {
+          const cost = Math.floor(5 * Math.pow(2, pvpUpgrades.rngExponent));
+          if (pvpCoins >= cost && pvpUpgrades.rngExponent < 5) {
+            pvpCoins -= cost;
+            pvpUpgrades.rngExponent++;
+            rngExponent += 0.1;
+            saveAll();
+            renderPVPUpgrades();
+            updatePVPDisplay();
+          }
+        }
+      };
+
+      function updatePVPDisplay() {
+        pvpCoinsDisplay.textContent = pvpCoins;
+        winStreakDisplay.textContent = winStreak;
+        totalWinsDisplay.textContent = totalWins;
+      }
+
+      pvpRollBtn.addEventListener('click', () => {
+        if (isPVPCooldown) return;
+        
+        const playerRoll = rollOnce(1, 1, 1);
+        const opponentRoll = rollOnce(1, 1, 1);
+        
+        let playerValue = parseFloat(playerRoll.inventoryData.displayValue.replace(/,/g, ''));
+        let opponentValue = parseFloat(opponentRoll.inventoryData.displayValue.replace(/,/g, ''));
+        
+        playerValue = Math.pow(Math.abs(playerValue), rngExponent);
+        opponentValue = Math.pow(Math.abs(opponentValue), rngExponent);
+        
+        let result = '';
+        if (playerValue > opponentValue) {
+          winStreak++;
+          totalWins++;
+          const coinsGained = 1 + (winStreak > 1 ? (winStreak - 1) * 2 : 0);
+          pvpCoins += coinsGained;
+          result = `<span style="color: #4ade80; font-weight: 700;">YOU WIN!</span><br>
+            You rolled: ${playerRoll.inventoryData.displayValue} (${playerRoll.inventoryData.rank})<br>
+            Opponent rolled: ${opponentRoll.inventoryData.displayValue} (${opponentRoll.inventoryData.rank})<br>
+            +${coinsGained} PVP Coins | Win Streak: ${winStreak}`;
+        } else {
+          winStreak = 0;
+          result = `<span style="color: #ef4444; font-weight: 700;">YOU LOSE!</span><br>
+            You rolled: ${playerRoll.inventoryData.displayValue} (${playerRoll.inventoryData.rank})<br>
+            Opponent rolled: ${opponentRoll.inventoryData.displayValue} (${opponentRoll.inventoryData.rank})<br>
+            Win streak reset!`;
+        }
+        
+        pvpResults.innerHTML = result;
+        updatePVPDisplay();
+        saveAll();
+        
+        isPVPCooldown = true;
+        pvpRollBtn.disabled = true;
+        let remaining = 5;
+        const interval = setInterval(() => {
+          pvpRollBtn.textContent = `Cooldown: ${remaining}s`;
+          remaining--;
+          if (remaining < 0) {
+            clearInterval(interval);
+            pvpRollBtn.disabled = false;
+            pvpRollBtn.textContent = 'Roll Against Opponent';
+            isPVPCooldown = false;
+          }
+        }, 1000);
+      });
 
       function loadDiscovered() {
         const saved = localStorage.getItem('calisRngDiscovered');
@@ -453,10 +1067,10 @@
       }
 
       toggleInventoryBtn.addEventListener('click', () => {
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection];
         if (inventorySection.style.display === 'none') {
+          sections.forEach(s => s.style.display = 'none');
           inventorySection.style.display = 'block';
-          indexSection.style.display = 'none';
-          shopSection.style.display = 'none';
           renderInventory();
         } else {
           inventorySection.style.display = 'none';
@@ -464,10 +1078,10 @@
       });
 
       toggleIndexBtn.addEventListener('click', () => {
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection];
         if (indexSection.style.display === 'none') {
+          sections.forEach(s => s.style.display = 'none');
           indexSection.style.display = 'block';
-          inventorySection.style.display = 'none';
-          shopSection.style.display = 'none';
           renderIndex();
         } else {
           indexSection.style.display = 'none';
@@ -475,13 +1089,47 @@
       });
 
       toggleShopBtn.addEventListener('click', () => {
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection];
         if (shopSection.style.display === 'none') {
+          sections.forEach(s => s.style.display = 'none');
           shopSection.style.display = 'block';
-          inventorySection.style.display = 'none';
-          indexSection.style.display = 'none';
           renderShop();
         } else {
           shopSection.style.display = 'none';
+        }
+      });
+
+      toggleMerchantBtn.addEventListener('click', () => {
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection];
+        if (merchantSection.style.display === 'none') {
+          sections.forEach(s => s.style.display = 'none');
+          merchantSection.style.display = 'block';
+          renderMerchant();
+        } else {
+          merchantSection.style.display = 'none';
+        }
+      });
+
+      toggleItemInventoryBtn.addEventListener('click', () => {
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection];
+        if (itemInventorySection.style.display === 'none') {
+          sections.forEach(s => s.style.display = 'none');
+          itemInventorySection.style.display = 'block';
+          renderItemInventory();
+        } else {
+          itemInventorySection.style.display = 'none';
+        }
+      });
+
+      togglePVPBtn.addEventListener('click', () => {
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection];
+        if (pvpSection.style.display === 'none') {
+          sections.forEach(s => s.style.display = 'none');
+          pvpSection.style.display = 'block';
+          renderPVPUpgrades();
+          updatePVPDisplay();
+        } else {
+          pvpSection.style.display = 'none';
         }
       });
 
@@ -546,7 +1194,7 @@
         </div>`;
         
         const generalCost = Math.floor(100 * Math.pow(1.05, shopUpgrades.generalLuck || 0));
-        const generalMaxed = (shopUpgrades.generalLuck || 0) >= 0;
+        const generalMaxed = (shopUpgrades.generalLuck || 0) >= 1000;
         html += `<div class="shop-item">
           <h4>+0.05x General Luck</h4>
           <p>Current: ${generalLuckBonus.toFixed(2)}x</p>
@@ -564,7 +1212,7 @@
         
         const blessingBonus = calisBlessingActive && totalRolls > 1 ? 
           (blessingBoosterActive ? 
-            Math.min(25, Math.pow(Math.log10(totalRolls), 1.15)) : 
+            Math.min(250, Math.pow(Math.log10(totalRolls), 3.33)) : 
             Math.min(5, Math.pow(Math.log10(totalRolls), 0.9))) : 0;
         html += `<div class="shop-item">
           <h4>Cali's Blessing</h4>
@@ -576,8 +1224,8 @@
         
         html += `<div class="shop-item">
           <h4>'Cali's Blessing' Booster</h4>
-          <p>Changes blessing formula to log(rolls)^2</p>
-          <p>Increases luck cap to +25x (for EVERYTHING)</p>
+          <p>Changes blessing formula to log(rolls)^3.33</p>
+          <p>Increases luck cap to +250x (for EVERYTHING)</p>
           <p>Cost: 10,000,000 Cali-coins</p>
           ${!shopUpgrades.calisBlessing ? '<p style="color: #888;">Requires Cali\'s Blessing</p>' : ''}
           ${shopUpgrades.blessingBooster ? '<p class="maxed">PURCHASED</p>' : `<button onclick="buyUpgrade('blessingBooster')" ${caliCoins < 10000000 || shopUpgrades.blessingBooster || !shopUpgrades.calisBlessing ? 'disabled' : ''}>Buy</button>`}
@@ -631,7 +1279,7 @@
           }
         } else if (type === 'generalLuck') {
           cost = Math.floor(100 * Math.pow(1.05, shopUpgrades.generalLuck || 0));
-          maxLevel = 98000;
+          maxLevel = 1000;
           if (caliCoins >= cost && (shopUpgrades.generalLuck || 0) < maxLevel) {
             caliCoins -= cost;
             shopUpgrades.generalLuck = (shopUpgrades.generalLuck || 0) + 1;
@@ -660,7 +1308,7 @@
           }
         }
         
-        saveShop();
+        saveAll();
         renderShop();
       };
 
@@ -683,12 +1331,19 @@
             caliCoins = shopData.coins || 0;
             totalRolls = shopData.totalRolls || 0;
             shopUpgrades = shopData.upgrades || { variantLuck: 0, rollBulk: 0, secretLuck: 0, specialLuck: 0, generalLuck: 0, sellPower: 0, availability: false, calisBlessing: false, blessingBooster: false };
+            pvpCoins = shopData.pvpCoins || 0;
+            winStreak = shopData.winStreak || 0;
+            totalWins = shopData.totalWins || 0;
+            pvpUpgrades = shopData.pvpUpgrades || { bulkRoll: 0, rngExponent: 0 };
+            itemInventory = shopData.itemInventory || [];
+            
             variantLuckBonus = 1 + ((shopUpgrades.variantLuck || 0) * 0.25);
-            secretLuckBonus = 1 + ((shopUpgrades.secretLuck || 0) * 0.1);
+            secretLuckBonus = 1 + ((shopUpgrades.secretLuck || 0) * 0.05);
             specialLuckBonus = 1 + ((shopUpgrades.specialLuck || 0) * 0.1);
             generalLuckBonus = 1 + ((shopUpgrades.generalLuck || 0) * 0.05);
             sellExponent = 0.33 + ((shopUpgrades.sellPower || 0) * 0.33);
-            rollBulk = 15 + (shopUpgrades.rollBulk || 0);
+            rollBulk = 15 + (shopUpgrades.rollBulk || 0) + ((pvpUpgrades.bulkRoll || 0) * 10);
+            rngExponent = 1 + ((pvpUpgrades.rngExponent || 0) * 0.1);
             availabilityUnlocked = shopUpgrades.availability || false;
             calisBlessingActive = shopUpgrades.calisBlessing || false;
             blessingBoosterActive = shopUpgrades.blessingBooster || false;
@@ -699,28 +1354,34 @@
         
         updateCoinsDisplay();
         updateRollCounter();
+        updatePVPDisplay();
         renderInventory();
+        renderItemInventory();
       }
 
-      function saveInventory() {
+      function saveAll() {
         localStorage.setItem('calisRngInventory', JSON.stringify(inventory));
-        renderInventory();
-      }
-
-      function saveShop() {
         const shopData = {
           coins: caliCoins,
           totalRolls: totalRolls,
-          upgrades: shopUpgrades
+          upgrades: shopUpgrades,
+          pvpCoins: pvpCoins,
+          winStreak: winStreak,
+          totalWins: totalWins,
+          pvpUpgrades: pvpUpgrades,
+          itemInventory: itemInventory
         };
         localStorage.setItem('calisRngShop', JSON.stringify(shopData));
         updateCoinsDisplay();
         updateRollCounter();
-        renderShop();
+        updatePVPDisplay();
+        renderInventory();
+        renderItemInventory();
       }
 
       function updateCoinsDisplay() {
         coinsDisplay.textContent = caliCoins.toFixed(2);
+        merchantCoinsDisplay.textContent = caliCoins.toFixed(2);
         rollMultipleBtn.textContent = `Roll ${rollBulk} Times`;
       }
 
@@ -806,8 +1467,7 @@
         caliCoins += coins;
         
         inventory.splice(index, 1);
-        saveInventory();
-        saveShop();
+        saveAll();
         
         alert(`Sold for ${coins.toFixed(2)} Cali-coins!`);
       }
@@ -818,7 +1478,7 @@
         
         if (lastClickTime[key] && now - lastClickTime[key] < 1000) {
           inventory.splice(index, 1);
-          saveInventory();
+          saveAll();
           lastClickTime[key] = 0;
         } else {
           lastClickTime[key] = now;
@@ -833,7 +1493,7 @@
         }
         
         inventory.push(item);
-        saveInventory();
+        saveAll();
         
         const btn = document.getElementById(buttonId);
         if (btn) {
@@ -853,20 +1513,25 @@
         isCooldown = true;
         rollOnceBtn.disabled = true;
         rollMultipleBtn.disabled = true;
+        rollSpecialLuckBtn.disabled = true;
         let remaining = duration / 1000;
         const originalText1 = rollOnceBtn.textContent;
         const originalText2 = rollMultipleBtn.textContent;
+        const originalText3 = rollSpecialLuckBtn.textContent;
 
         const interval = setInterval(() => {
           rollOnceBtn.textContent = `Cooldown: ${remaining.toFixed(1)}s`;
           rollMultipleBtn.textContent = `Cooldown: ${remaining.toFixed(1)}s`;
+          rollSpecialLuckBtn.textContent = `Cooldown: ${remaining.toFixed(1)}s`;
           remaining -= 0.1;
           if (remaining <= 0) {
             clearInterval(interval);
             rollOnceBtn.disabled = false;
             rollMultipleBtn.disabled = false;
+            rollSpecialLuckBtn.disabled = false;
             rollOnceBtn.textContent = originalText1;
             rollMultipleBtn.textContent = originalText2;
+            rollSpecialLuckBtn.textContent = originalText3;
             isCooldown = false;
           }
         }, 100);
@@ -894,7 +1559,7 @@
         return 'linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet)';
       }
 
-      function rollOnce(luckMultiplier = 1, variantLuckMultiplier = 1, secretLuckMultiplier = 1) {
+      function rollOnce(luckMultiplier = 1, variantLuckMultiplier = 1, secretLuckMultiplier = 1, isCheese = false) {
         luckMultiplier *= generalLuckBonus;
         variantLuckMultiplier *= generalLuckBonus;
         secretLuckMultiplier *= generalLuckBonus;
@@ -916,8 +1581,20 @@
         let noCooldownRanks = ['???UNKNOWN???', 'nil', 'Lmao'];
         let originalValue = null;
 
+        if (isCheese) {
+          isSpecial = true;
+          markDiscovered('specialRanks', 'Cheesium');
+          const invData = {
+            variants: '',
+            displayValue: '🧀',
+            rank: 'Cheesium',
+            color: '#FFD700'
+          };
+          return { result: '<span class="bold" style="color: #FFD700;">You rolled a/an RANKBUTTON (🧀)!</span>', cooldown: 2500, inventoryData: invData };
+        }
+
         // RNGarbage 1/15,629,519
-        if (Math.random() < (1 / 15629519) * specialLuckBonus) {
+        if (Math.random() < (1 / 15629519) * specialLuckBonus * luckMultiplier) {
           isSpecial = true;
           markDiscovered('specialRanks', 'RNGarbage');
           const invData = {
@@ -930,7 +1607,7 @@
         }
 
         // RNGod 1/10,000,000
-        if (Math.random() < (1 / 10000000) * specialLuckBonus) {
+        if (Math.random() < (1 / 10000000) * specialLuckBonus * luckMultiplier) {
           isSpecial = true;
           markDiscovered('specialRanks', 'RNGod');
           const invData = {
@@ -995,7 +1672,7 @@
         }
 
         // Catastrophic 1/390625
-        if (Math.random() < (1 / 390625) * specialLuckBonus) {
+        if (Math.random() < (1 / 390625) * specialLuckBonus * luckMultiplier) {
           isSpecial = true;
           markDiscovered('specialRanks', 'Catastrophic');
           const invData = {
@@ -1008,7 +1685,7 @@
         }
 
         // In im table ?!?!? 1/750k
-        if (Math.random() < (1 / 750000) * specialLuckBonus) {
+        if (Math.random() < (1 / 750000) * specialLuckBonus * luckMultiplier) {
           isSpecial = true;
           markDiscovered('specialRanks', 'In im table ?!?!?');
           const invData = {
@@ -1034,7 +1711,7 @@
         }
 
         // Invisible 1/500000
-        if (Math.random() < (1 / 500000) * specialLuckBonus) {
+        if (Math.random() < (1 / 500000) * specialLuckBonus * luckMultiplier) {
           isSpecial = true;
           originalValue = Math.random() * 50000;
           markDiscovered('specialRanks', 'Invisible');
@@ -1132,7 +1809,12 @@
           { name: 'Gigaconfuscibretrationiminousis', chance: 1 / 1000000, multiplier: 1000000 },
           { name: 'Ethereal', chance: 1 / 2500000, multiplier: 2500000 },
           { name: 'Limitless', chance: 1 / 10000000, multiplier: 10000000 },
-          { name: 'INFINITUM', chance: 1 / 1e18, multiplier: 1e18 }
+          { name: 'INFINITUM', chance: 1 / 1e18, multiplier: 1e18 },
+          { name: 'evil', chance: 1 / 69420, multiplier: 1.01 },
+          { name: 'Light', chance: 1 / 7500, multiplier: 7500 },
+          { name: 'void.', chance: 1 / 1000000000, multiplier: 1000000000 },
+          { name: 'Unhonored', chance: 1 / 666666, multiplier: 666666 },
+          { name: 'REALITY', chance: 1 / 100000000, multiplier: 100000000 }
         ];
 
         let variantText = '';
@@ -1165,14 +1847,14 @@
         let rank = '';
         let displayValue = baseValue;
 
-        if (Math.random() < 1 / 989000 * specialLuckBonus) { 
+        if (Math.random() < 1 / 989000 * specialLuckBonus * luckMultiplier) { 
           rank = 'INSANE'; 
           displayValue = 0.989; 
           originalValue = 0.989;
           isSpecial = true;
           markDiscovered('specialRanks', 'INSANE');
         }
-        else if (Math.random() < 1 / 1500 * specialLuckBonus) { 
+        else if (Math.random() < 1 / 1500 * specialLuckBonus * luckMultiplier) { 
           rank = 'Lmao'; 
           displayValue = 0.1;
           originalValue = 0.1;
@@ -1185,7 +1867,7 @@
           isSpecial = true;
           markDiscovered('specialRanks', 'PERFECTIONIST');
         }
-        else if (Math.random() < 1 / 8888 * specialLuckBonus) { 
+        else if (Math.random() < 1 / 8888 * specialLuckBonus * luckMultiplier) { 
           rank = "Imaginary"; 
           displayValue = "0.1i";
           originalValue = 0.1;
@@ -1210,14 +1892,14 @@
           rank = 'nothing';
           markDiscovered('ranks', 'nothing');
         }
-        else if (Math.random() < 1 / 69000 * specialLuckBonus) { 
+        else if (Math.random() < 1 / 69000 * specialLuckBonus * luckMultiplier) { 
           rank = 'NICE';
           displayValue = 69;
           originalValue = 69;
           isSpecial = true;
           markDiscovered('specialRanks', 'NICE');
         }
-        else if (Math.random() < 1 / 694200 * specialLuckBonus) { 
+        else if (Math.random() < 1 / 694200 * specialLuckBonus * luckMultiplier) { 
           rank = 'FUNNY';
           displayValue = 69420;
           originalValue = 69420;
@@ -1225,7 +1907,7 @@
           markDiscovered('specialRanks', 'FUNNY');
         }
         else if (absBaseValue < 5) {
-          if (Math.random() < 1 / 33333 * specialLuckBonus) { 
+          if (Math.random() < 1 / 33333 * specialLuckBonus * luckMultiplier) { 
             rank = 'Common : DIVINITY'; 
             displayValue *= 5e5;
             isSpecial = true;
@@ -1238,7 +1920,8 @@
         }
         else if (absBaseValue < 25) { rank = 'Natural'; markDiscovered('ranks', 'Natural'); }
         else if (absBaseValue < 50) { rank = 'Rare'; markDiscovered('ranks', 'Rare'); }
-        else if (absBaseValue < 100) { rank = 'Unnatural'; markDiscovered('ranks', 'Unnatural'); }
+        else if (absBaseValue < 80000) { rank = 'Unnatural'; markDiscovered('ranks', 'Unnatural'); }
+        else if (absBaseValue < 100000) { rank = 'Microb'; markDiscovered('ranks', 'Microb'); }
         else if (absBaseValue < 250) { rank = 'Epic'; markDiscovered('ranks', 'Epic'); }
         else if (absBaseValue < 500) { rank = 'Decent'; markDiscovered('ranks', 'Decent'); }
         else if (absBaseValue < 1000) { rank = 'Mythical'; markDiscovered('ranks', 'Mythical'); }
@@ -1246,23 +1929,27 @@
         else if (absBaseValue < 10000) { rank = 'Unreal'; markDiscovered('ranks', 'Unreal'); }
         else if (absBaseValue < 50000) { rank = 'Super Rare'; markDiscovered('ranks', 'Super Rare'); }
         else if (absBaseValue < 100000) { rank = 'Eternal'; markDiscovered('ranks', 'Eternal'); }
+        else if (absBaseValue < 250000) { rank = 'Attainable'; markDiscovered('ranks', 'Attainable'); }
         else if (absBaseValue < 500000) { rank = 'Starstruck'; markDiscovered('ranks', 'Starstruck'); }
-        else if (absBaseValue < 1000000) { rank = 'Paradoxical'; markDiscovered('ranks', 'Paradoxical'); }
+        else if (absBaseValue < 777777) { rank = 'Paradoxical'; markDiscovered('ranks', 'Paradoxical'); }
+        else if (absBaseValue < 788888) { rank = 'Directional'; markDiscovered('ranks', 'Directional'); }
+        else if (absBaseValue < 1000000) { rank = 'Limitless'; markDiscovered('ranks', 'Limitless'); }
         else if (absBaseValue < 5000000) { rank = 'Iridescent'; markDiscovered('ranks', 'Iridescent'); }
-        else if (absBaseValue < 10000000) { rank = 'Lux'; markDiscovered('ranks', 'Lux'); }
-        else if (absBaseValue < 50000000) { rank = 'Possible'; markDiscovered('ranks', 'Possible'); }
-        else if (absBaseValue < 100000000) { rank = 'RNGesus'; markDiscovered('ranks', 'RNGesus'); }
-        else if (absBaseValue < 250000000) { rank = 'CRAZY'; markDiscovered('ranks', 'CRAZY'); }
-        else if (absBaseValue < 1000000000) { rank = 'Supreme'; markDiscovered('ranks', 'Supreme'); }
-        else if (absBaseValue < 1e10) { rank = 'DAMN'; markDiscovered('ranks', 'DAMN'); }
-        else if (absBaseValue < 1e12) { rank = 'Stupiditium'; markDiscovered('ranks', 'Stupiditium'); }
-        else if (absBaseValue < 1e15) { rank = 'ASCENDED'; markDiscovered('ranks', 'ASCENDED'); }
-        else if (absBaseValue < 1e18) { rank = 'Obscure'; markDiscovered('ranks', 'Obscure'); }
-        else if (absBaseValue < 1e21) { rank = 'INFINITE'; markDiscovered('ranks', 'INFINITE'); }
-        else if (absBaseValue < 1e30) { rank = 'Divine'; markDiscovered('ranks', 'Divine'); }
-        else if (absBaseValue < 1e50) { rank = 'Insurmountable'; markDiscovered('ranks', 'Insurmountable'); }
-        else if (absBaseValue < 1e75) { rank = 'GRAND'; markDiscovered('ranks', 'GRAND'); }
-        else if (absBaseValue < 1e100) { rank = 'what.'; markDiscovered('ranks', 'what.'); }
+        else if (absBaseValue < 10000000) { rank = 'Endless'; markDiscovered('ranks', 'Endless'); }
+        else if (absBaseValue < 50000000) { rank = 'Lux'; markDiscovered('ranks', 'Lux'); }
+        else if (absBaseValue < 100000000) { rank = 'Possible'; markDiscovered('ranks', 'Possible'); }
+        else if (absBaseValue < 250000000) { rank = 'RNGesus'; markDiscovered('ranks', 'RNGesus'); }
+        else if (absBaseValue < 1000000000) { rank = 'CRAZY'; markDiscovered('ranks', 'CRAZY'); }
+        else if (absBaseValue < 1e10) { rank = 'Supreme'; markDiscovered('ranks', 'Supreme'); }
+        else if (absBaseValue < 1e12) { rank = 'DAMN'; markDiscovered('ranks', 'DAMN'); }
+        else if (absBaseValue < 1e15) { rank = 'Stupiditium'; markDiscovered('ranks', 'Stupiditium'); }
+        else if (absBaseValue < 1e18) { rank = 'ASCENDED'; markDiscovered('ranks', 'ASCENDED'); }
+        else if (absBaseValue < 1e21) { rank = 'Obscure'; markDiscovered('ranks', 'Obscure'); }
+        else if (absBaseValue < 1e30) { rank = 'INFINITE'; markDiscovered('ranks', 'INFINITE'); }
+        else if (absBaseValue < 1e50) { rank = 'Divine'; markDiscovered('ranks', 'Divine'); }
+        else if (absBaseValue < 1e75) { rank = 'Insurmountable'; markDiscovered('ranks', 'Insurmountable'); }
+        else if (absBaseValue < 1e100) { rank = 'GRAND'; markDiscovered('ranks', 'GRAND'); }
+        else if (absBaseValue < 1e150) { rank = 'what.'; markDiscovered('ranks', 'what.'); }
         else { rank = 'FINALE'; markDiscovered('ranks', 'FINALE'); }
 
         if (Math.random() < (1 / 2763000) * luckMultiplier * specialLuckBonus) {
@@ -1364,7 +2051,7 @@
 
         const rankButton = `<button class="rank-button" id="rank-btn-ROLLINDEX" onclick="acceptRoll(ROLLINDEX)">${rank}</button>`;
 
-        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>','UNOBTAINABLE','Everlasting','RNGod','Invisible','cali','RNGarbage','leaflet'].includes(rank)) {
+        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>','UNOBTAINABLE','Everlasting','RNGod','Invisible','cali','RNGarbage','leaflet','Cheesium'].includes(rank)) {
           if (color.startsWith('linear-gradient')) {
             result += `<span class="bold" style="background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">You rolled a/an RANKBUTTON (${dispValue})!</span>`;
           } else {
@@ -1399,7 +2086,7 @@
         if (isCooldown) return;
         multiRolls = [];
         totalRolls++;
-        saveShop();
+        saveAll();
         const roll = rollOnce(33, 33, 33 * secretLuckBonus);
         multiRolls.push(roll.inventoryData);
         
@@ -1419,7 +2106,7 @@
         
         for (let i = 0; i < rollBulk; i++) {
           totalRolls++;
-          const roll = rollOnce (30, 25, 15 * secretLuckBonus);
+          const roll = rollOnce(30, 25, 15 * secretLuckBonus);
           multiRolls.push(roll.inventoryData);
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, i.toString()).replace(/RANKBUTTON/g, roll.inventoryData ? 
@@ -1430,15 +2117,39 @@
           if (roll.cooldown > maxCooldown) maxCooldown = roll.cooldown;
         }
         
-        saveShop();
+        saveAll();
         resultsDiv.innerHTML = output;
         if (maxCooldown > 0) setCooldown(maxCooldown);
+      });
+
+      rollSpecialLuckBtn.addEventListener('click', () => {
+        if (isCooldown) return;
+        if (caliCoins < 1e50) {
+          alert('Not enough coins! You need 1e50 Cali-coins.');
+          return;
+        }
+        
+        caliCoins -= 1e50;
+        multiRolls = [];
+        totalRolls++;
+        saveAll();
+        const roll = rollOnce(10000, 10000, 10000 * secretLuckBonus);
+        multiRolls.push(roll.inventoryData);
+        
+        let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
+          `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>` : 
+          roll.inventoryData ? roll.inventoryData.rank : '???');
+        
+        resultsDiv.innerHTML = '<span style="color: gold;">SUPER LUCK ROLL!</span><br>' + displayResult;
+        if (roll.cooldown > 0) setCooldown(roll.cooldown);
       });
 
       window.acceptRoll = acceptRoll;
 
       loadDiscovered();
       loadInventory();
+      generateMerchantStock();
+      renderMerchant();
     </script>
   </body>
 </html>
