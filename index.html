@@ -1698,7 +1698,7 @@
         }
 
         // ???UNKNOWN??? 1/1234567 - NO COOLDOWN
-        if (Math.random() < (1 / 1234567) * luckMultiplier * specialLuckBonus) {
+        if (Math.random() < (1 / 12345678) * luckMultiplier * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', '???UNKNOWN???');
           const invData = {
@@ -1710,8 +1710,8 @@
           return { result: '<span class="bold">You rolled a/an RANKBUTTON (???)!</span>', cooldown: 0, inventoryData: invData };
         }
 
-        // Invisible 1/500000
-        if (Math.random() < (1 / 500000) * specialLuckBonus * luckMultiplier) {
+        // Invisible 1/5000000
+        if (Math.random() < (1 / 5000000) * specialLuckBonus * luckMultiplier) {
           isSpecial = true;
           originalValue = Math.random() * 50000;
           markDiscovered('specialRanks', 'Invisible');
@@ -1847,14 +1847,14 @@
         let rank = '';
         let displayValue = baseValue;
 
-        if (Math.random() < 1 / 989000 * specialLuckBonus * luckMultiplier) { 
+        if (Math.random() < 1 / 9890000 * specialLuckBonus * luckMultiplier) { 
           rank = 'INSANE'; 
           displayValue = 0.989; 
           originalValue = 0.989;
           isSpecial = true;
           markDiscovered('specialRanks', 'INSANE');
         }
-        else if (Math.random() < 1 / 150000 * specialLuckBonus * luckMultiplier) { 
+        else if (Math.random() < 1 / 1500000 * specialLuckBonus * luckMultiplier) { 
           rank = 'Lmao'; 
           displayValue = 0.1;
           originalValue = 0.1;
@@ -1867,7 +1867,7 @@
           isSpecial = true;
           markDiscovered('specialRanks', 'PERFECTIONIST');
         }
-        else if (Math.random() < 1 / 88888 * specialLuckBonus * luckMultiplier) { 
+        else if (Math.random() < 1 / 888888 * specialLuckBonus * luckMultiplier) { 
           rank = "Imaginary"; 
           displayValue = "0.1i";
           originalValue = 0.1;
@@ -1892,14 +1892,14 @@
           rank = 'nothing';
           markDiscovered('ranks', 'nothing');
         }
-        else if (Math.random() < 1 / 69000 * specialLuckBonus * luckMultiplier) { 
+        else if (Math.random() < 1 / 690000 * specialLuckBonus * luckMultiplier) { 
           rank = 'NICE';
           displayValue = 69;
           originalValue = 69;
           isSpecial = true;
           markDiscovered('specialRanks', 'NICE');
         }
-        else if (Math.random() < 1 / 694200 * specialLuckBonus * luckMultiplier) { 
+        else if (Math.random() < 1 / 6942000 * specialLuckBonus * luckMultiplier) { 
           rank = 'FUNNY';
           displayValue = 69420;
           originalValue = 69420;
@@ -1907,7 +1907,7 @@
           markDiscovered('specialRanks', 'FUNNY');
         }
         else if (absBaseValue < 5) {
-          if (Math.random() < 1 / 33333 * specialLuckBonus * luckMultiplier) { 
+          if (Math.random() < 1 / 333333 * specialLuckBonus * luckMultiplier) { 
             rank = 'Common : DIVINITY'; 
             displayValue *= 5e5;
             isSpecial = true;
