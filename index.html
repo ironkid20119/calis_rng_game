@@ -1654,7 +1654,7 @@
           markDiscovered('specialRanks', 'Legacy FINALE');
           const invData = {
             variants: '',
-            displayValue: 'L1.0000e+10',
+            displayValue: '1.0000e+10',
             rank: 'Legacy FINALE',
             color: 'gold'
           };
@@ -1701,7 +1701,7 @@
         }
 
         // ???UNKNOWN??? 1/1234567 - NO COOLDOWN
-        if (Math.random() < (1 / 1234567) * luckMultiplier) {
+        if (Math.random() < (1 / 1234567) * specialluckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', '???UNKNOWN???');
           const invData = {
@@ -1850,7 +1850,7 @@
         let rank = '';
         let displayValue = baseValue;
 
-        if (Math.random() < 1 / 9890000 * specialLuckBonus) { 
+        if (Math.random() < 1 / 98900 * specialLuckBonus) { 
           rank = 'INSANE'; 
           displayValue = 0.989; 
           originalValue = 0.989;
@@ -1870,7 +1870,7 @@
           isSpecial = true;
           markDiscovered('specialRanks', 'PERFECTIONIST');
         }
-        else if (Math.random() < 1 / 888888 * specialLuckBonus) { 
+        else if (Math.random() < 1 / 88888 * specialLuckBonus) { 
           rank = "Imaginary"; 
           displayValue = "0.1i";
           originalValue = 0.1;
@@ -1955,7 +1955,7 @@
         else if (absBaseValue < 1e150) { rank = 'what.'; markDiscovered('ranks', 'what.'); }
         else { rank = 'FINALE'; markDiscovered('ranks', 'FINALE'); }
 
-        if (Math.random() < (1 / 27630) {
+        if (Math.random() < (1 / 27630 * specialLuckBonus) {
           isSpecial = true;
           rank = 'leaflet';
           displayValue = 2763;
