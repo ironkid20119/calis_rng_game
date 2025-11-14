@@ -2072,7 +2072,7 @@
 
         let cooldown = 0;
         if (isSpecial && !noCooldownRanks.includes(rank)) {
-          cooldown = 5;
+          cooldown = 100;
         } else if (absDisplayValue >= 1e63) {
           cooldown = 1500;
         }
