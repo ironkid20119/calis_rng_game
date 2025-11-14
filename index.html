@@ -1559,6 +1559,7 @@
         if (value < 1e60) return 'linear-gradient(90deg, purple, black, purple, black, purple, black, purple)';
         if (value < 1e63) return 'linear-gradient(90deg, blue, cyan, blue, cyan)';
         if (value < 1e66) return 'linear-gradient(90deg, red, orange, red, orange)';
+        if (value < 1e69) return 'linear-gradient(90deg, pink, white, pink, white)';
         return 'linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet)';
       }
 
@@ -1857,7 +1858,7 @@
           isSpecial = true;
           markDiscovered('specialRanks', 'INSANE');
         }
-        else if (Math.random() < 1 / 15000 * specialLuckBonus) { 
+        else if (Math.random() < 1 / 150000 * specialLuckBonus) { 
           rank = 'Lmao'; 
           displayValue = 0.1;
           originalValue = 0.1;
@@ -1955,7 +1956,7 @@
         else if (absBaseValue < 1e150) { rank = 'what.'; markDiscovered('ranks', 'what.'); }
         else { rank = 'FINALE'; markDiscovered('ranks', 'FINALE'); }
 
-        if (Math.random() < (1 / 27630 * specialLuckBonus)) {
+        if (Math.random() < (1 / 276300 * specialLuckBonus)) {
           isSpecial = true;
           rank = 'leaflet';
           displayValue = 2763;
