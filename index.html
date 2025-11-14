@@ -2072,7 +2072,7 @@
 
         let cooldown = 0;
         if (isSpecial && !noCooldownRanks.includes(rank)) {
-          cooldown = 500;
+          cooldown = 5;
         } else if (absDisplayValue >= 1e63) {
           cooldown = 1500;
         }
@@ -2138,7 +2138,7 @@
         multiRolls = [];
         totalRolls++;
         saveAll();
-        const roll = rollOnce(10, 10, 100000 * secretLuckBonus);
+        const roll = rollOnce(10, 10, 1000000 * secretLuckBonus);
         multiRolls.push(roll.inventoryData);
         
         let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
