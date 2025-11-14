@@ -1744,14 +1744,14 @@
 
         let base = Math.random();
         let skewed;
-        if (base < 0.5) skewed = 1 + Math.random() * 18;
-        else if (base < 0.75) skewed = 10 + Math.random() * 180;
-        else if (base < 0.90) skewed = 100 + Math.random() * 1800;
-        else if (base < 0.97) skewed = 1000 + Math.random() * 18000;
-        else if (base < 0.99) skewed = 10000 + Math.random() * 180000;
-        else if (base < 0.997) skewed = 100000 + Math.random() * 1800000;
-        else if (base < 0.9995) skewed = 1000000 + Math.random() * 18000000;
-        else skewed = 10000000 + Math.random() * 1800000000;
+        if (base < 0.5) skewed = 1 + Math.random() * 180;
+        else if (base < 0.75) skewed = 10 + Math.random() * 1800;
+        else if (base < 0.90) skewed = 100 + Math.random() * 18000;
+        else if (base < 0.97) skewed = 1000 + Math.random() * 180000;
+        else if (base < 0.99) skewed = 10000 + Math.random() * 1800000;
+        else if (base < 0.997) skewed = 100000 + Math.random() * 18000000;
+        else if (base < 0.9995) skewed = 1000000 + Math.random() * 180000000;
+        else skewed = 10000000 + Math.random() * 18000000000;
 
         skewed = Math.max(1, skewed);
         if (Math.random() < 1 / 1000) skewed = -1;
@@ -2073,7 +2073,7 @@
         let cooldown = 0;
         if (isSpecial && !noCooldownRanks.includes(rank)) {
           cooldown = 500;
-        } else if (absDisplayValue >= 1e50) {
+        } else if (absDisplayValue >= 1e63) {
           cooldown = 1500;
         }
 
@@ -2138,7 +2138,7 @@
         multiRolls = [];
         totalRolls++;
         saveAll();
-        const roll = rollOnce(10, 10, 1000000000 * secretLuckBonus);
+        const roll = rollOnce(10, 10, 100000 * secretLuckBonus);
         multiRolls.push(roll.inventoryData);
         
         let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
