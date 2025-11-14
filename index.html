@@ -2092,7 +2092,7 @@
         multiRolls = [];
         totalRolls++;
         saveAll();
-        const roll = rollOnce(33, 33, 33 * secretLuckBonus);
+        const roll = rollOnce(33, 33, 100 * secretLuckBonus);
         multiRolls.push(roll.inventoryData);
         
         let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
@@ -2111,7 +2111,7 @@
         
         for (let i = 0; i < rollBulk; i++) {
           totalRolls++;
-          const roll = rollOnce(30, 25, 15 * secretLuckBonus);
+          const roll = rollOnce(30, 25, 5 * secretLuckBonus);
           multiRolls.push(roll.inventoryData);
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, i.toString()).replace(/RANKBUTTON/g, roll.inventoryData ? 
@@ -2138,7 +2138,7 @@
         multiRolls = [];
         totalRolls++;
         saveAll();
-        const roll = rollOnce(10000, 10000, 10000 * secretLuckBonus);
+        const roll = rollOnce(10, 10, 10000 * secretLuckBonus);
         multiRolls.push(roll.inventoryData);
         
         let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
