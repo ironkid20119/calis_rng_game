@@ -2284,7 +2284,7 @@
         let cooldown = 0;
         if (isSpecial && !noCooldownRanks.includes(rank)) {
           cooldown = 100;
-        } else if (absDisplayValue >= 1e25) {
+        } else if (absDisplayValue >= 1e35) {
           cooldown = 1500;
         }
 
@@ -2340,12 +2340,12 @@
 
       rollSpecialLuckBtn.addEventListener('click', () => {
         if (isCooldown) return;
-        if (caliCoins < 1e50) {
+        if (caliCoins < 1e35) {
           alert('Not enough coins! You need 1e50 Cali-coins.');
           return;
         }
         
-        caliCoins -= 1e50;
+        caliCoins -= 1e35;
         multiRolls = [];
         totalRolls++;
         saveAll();
