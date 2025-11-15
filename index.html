@@ -386,6 +386,14 @@
         background-color: #ff5555;
       }
 
+      #toggleCurses {
+        background-color: #7c3aed;
+      }
+
+      #toggleCurses:hover {
+        background-color: #8b5cf6;
+      }
+
       .pvp-section {
         margin-top: 30px;
         padding: 20px;
@@ -422,6 +430,35 @@
 
       .pvp-upgrades {
         margin-top: 20px;
+      }
+
+      .curses-section {
+        margin-top: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+      }
+
+      .curse-item {
+        background: rgba(0, 0, 0, 0.4);
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+        border: 2px solid #7c3aed;
+      }
+
+      .curse-item.active {
+        border-color: #ef4444;
+        background: rgba(239, 68, 68, 0.2);
+      }
+
+      .curse-item h4 {
+        margin: 0 0 10px 0;
+        color: #7c3aed;
+      }
+
+      .curse-item.active h4 {
+        color: #ef4444;
       }
 
       #rollSpecialLuck {
@@ -470,6 +507,7 @@
       <button id="toggleMerchant">Toggle Merchant</button>
       <button id="toggleItemInventory">Toggle Item Inventory</button>
       <button id="togglePVP">Toggle PVP</button>
+      <button id="toggleCurses">Toggle Curses</button>
       <button id="toggleSellMode">Sell Mode: OFF</button>
 
       <div id="results"></div>
@@ -521,6 +559,13 @@
         </div>
       </div>
 
+      <div class="curses-section" id="cursesSection" style="display: none;">
+        <h2>Curses</h2>
+        <div class="coins-display">Cali-coins: <span id="cursesCoinsDisplay">0</span></div>
+        <p style="color: #fbbf24; margin-bottom: 15px;">Only ONE curse can be active at a time. Costs 16.66% of current coins to unequip.</p>
+        <div id="cursesContent"></div>
+      </div>
+
       <div class="index-section" id="indexSection" style="display: none;">
         <h2>Discovery Index</h2>
         <div id="indexContent"></div>
@@ -545,6 +590,7 @@
       const toggleMerchantBtn = document.getElementById('toggleMerchant');
       const toggleItemInventoryBtn = document.getElementById('toggleItemInventory');
       const togglePVPBtn = document.getElementById('togglePVP');
+      const toggleCursesBtn = document.getElementById('toggleCurses');
       const toggleSellModeBtn = document.getElementById('toggleSellMode');
       const inventorySection = document.getElementById('inventorySection');
       const indexSection = document.getElementById('indexSection');
@@ -552,6 +598,7 @@
       const merchantSection = document.getElementById('merchantSection');
       const itemInventorySection = document.getElementById('itemInventorySection');
       const pvpSection = document.getElementById('pvpSection');
+      const cursesSection = document.getElementById('cursesSection');
       const pvpRollBtn = document.getElementById('pvpRollBtn');
       const indexContent = document.getElementById('indexContent');
       const shopContent = document.getElementById('shopContent');
@@ -559,8 +606,10 @@
       const itemInventoryGrid = document.getElementById('itemInventoryGrid');
       const pvpResults = document.getElementById('pvpResults');
       const pvpUpgradesContent = document.getElementById('pvpUpgradesContent');
+      const cursesContent = document.getElementById('cursesContent');
       const coinsDisplay = document.getElementById('coinsDisplay');
       const merchantCoinsDisplay = document.getElementById('merchantCoinsDisplay');
+      const cursesCoinsDisplay = document.getElementById('cursesCoinsDisplay');
       const inventoryCountDisplay = document.getElementById('inventoryCount');
       const itemInventoryCountDisplay = document.getElementById('itemInventoryCount');
       const maxSlotsDisplay = document.getElementById('maxSlotsDisplay');
@@ -599,6 +648,10 @@
       let winStreak = 0;
       let totalWins = 0;
       let rngExponent = 1;
+      let activeCurse = null;
+      let cursesUnlocked = false;
+      let yinYangState = 'normal';
+      let yinYangTimer = 60;
       let playedSongs = [];
       let currentAudio = null;
       let musicPaused = false;
@@ -621,12 +674,25 @@
         rngExponent: 0
       };
       
+      const CURSES = {
+        greed: {
+          name: 'Greed',
+          description: 'x5 PVP coins and Cali-coins gain, but divide all luck by 10',
+          pvpCost: 250
+        },
+        cursedMultiplier: {
+          name: 'Cursed Multiplier',
+          description: 'Every booster is x5 better, but 1/2.5 chance to ruin roll (gives 1.01 with no variants)',
+          pvpCost: 250
+        }
+      };
+      
       let lastClickTime = {};
       let sellMode = false;
 
       const ALL_RANKS = ['nothing', 'Common', 'Natural', 'Rare', 'Unnatural', 'Epic', 'Decent', 'Mythical', 'Legendary', 'Unreal', 'Super Rare', 'Eternal', 'Starstruck', 'Paradoxical', 'Iridescent', 'Lux', 'Possible', 'RNGesus', 'CRAZY', 'Supreme', 'DAMN', 'Stupiditium', 'ASCENDED', 'Obscure', 'INFINITE', 'Divine', 'Insurmountable', 'GRAND', 'what.', 'FINALE', 'Microb', 'Attainable', 'Directional', 'Limitless', 'Endless'];
       
-      const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>', 'UNOBTAINABLE', 'Everlasting', 'RNGod', 'Invisible', 'cali', 'RNGarbage', 'Cheesium'];
+      const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>', 'UNOBTAINABLE', 'Everlasting', 'RNGod', 'Invisible', 'cali', 'RNGarbage', 'Cheesium', 'pepeCringe'];
       
       const ALL_SECRET_RANKS = ['🐟', 'Destiny', '🌳', 'ULTIMATE'];
       
@@ -634,23 +700,15 @@
       
       const ALL_VARIANTS = ['shiny', 'golden', 'inverse', 'retro', 'bright', 'cosmic', 'GIGANTIC', 'h o r s e', 'eternal', 'dark', 'UNIVERSAL', 'Modified', 'Colorful', 'Gigaconfuscibretrationiminousis', 'Possible', 'Gargantuan', 'Ethereal', 'Limitless', 'INFINITUM', 'evil', 'Light', 'void.', 'Unhonored', 'REALITY'];
 
-      // Using royalty-free music from various sources
-      const MUSIC_URLS = [
-        'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', // Placeholder - will use generated tones
-      ];
-
       function initMusic() {
-        // Create an audio context for generating simple background tones
-        // This avoids external dependencies and copyright issues
       }
 
       function playNextSong() {
         if (musicPaused || !musicStarted) return;
         
-        // Generate a simple melodic loop using Web Audio API
         try {
           const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-          const notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25]; // C major scale
+          const notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
           let currentNote = 0;
           let noteInterval;
           
@@ -676,7 +734,6 @@
           noteInterval = setInterval(playNote, 500);
           musicStatus.textContent = 'Music: Playing';
           
-          // Store cleanup function
           window.musicCleanup = () => {
             clearInterval(noteInterval);
             audioContext.close();
@@ -716,12 +773,10 @@
       function generateMerchantStock() {
         merchantStock = [];
         
-        // Generate 10 items guaranteed
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 12; i++) {
           const rand = Math.random();
           
           if (rand < 1/10) {
-            // Cheese
             merchantStock.push({
               name: 'Cheese',
               cost: 69,
@@ -729,7 +784,6 @@
               type: 'cheese'
             });
           } else if (rand < 1/10 + 1/100) {
-            // Special Booster
             const multiplier = Math.pow(Math.random(), -2.5);
             const cost = Math.floor(Math.pow(multiplier, 1.25));
             merchantStock.push({
@@ -739,8 +793,24 @@
               multiplier: multiplier,
               type: 'specialBooster'
             });
+          } else if (rand < 1/10 + 1/100 + 1/150) {
+            const multiplier = Math.pow(Math.random(), -2.5);
+            const cost = Math.floor(Math.pow(multiplier, 1.25));
+            merchantStock.push({
+              name: 'Variant Booster',
+              cost: cost,
+              description: `Multiplies variant luck by ${multiplier.toFixed(2)}x`,
+              multiplier: multiplier,
+              type: 'variantBooster'
+            });
+          } else if (rand < 1/10 + 1/100 + 1/150 + 1/200) {
+            merchantStock.push({
+              name: 'Yin-Yang',
+              cost: 500,
+              description: 'Every minute, switches between x100 normal luck/x0 special and x0 normal/x100,000 special',
+              type: 'yinYang'
+            });
           } else {
-            // Regular Booster
             const multiplier = Math.pow(Math.random(), -2.5);
             const cost = Math.floor(Math.pow(multiplier, 1.25));
             merchantStock.push({
@@ -841,19 +911,38 @@
             resultsDiv.innerHTML = '<span style="color: yellow;">The cheese did nothing...</span>';
           }
         } else if (item.type === 'booster') {
+          let boostMultiplier = item.multiplier;
+          if (activeCurse === 'cursedMultiplier') {
+            boostMultiplier *= 5;
+            if (Math.random() < 1/2.5) {
+              const invData = {
+                variants: '',
+                displayValue: '1.01',
+                rank: 'Common',
+                color: 'white'
+              };
+              multiRolls = [invData];
+              resultsDiv.innerHTML = '<span style="color: #ef4444;">CURSED! Roll ruined!</span><br><span>You rolled a/an 1.01 <button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">Common</button>!</span>';
+              itemInventory.splice(index, 1);
+              saveAll();
+              renderItemInventory();
+              return;
+            }
+          }
+          
           totalRolls++;
-          const roll = rollOnce(item.multiplier, item.multiplier, item.multiplier);
+          const roll = rollOnce(boostMultiplier, boostMultiplier, boostMultiplier);
           multiRolls = [roll.inventoryData];
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, 
             `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>`);
           
-          resultsDiv.innerHTML = '<span style="color: gold;">BOOSTER ACTIVATED! (Luck x' + item.multiplier.toFixed(2) + ')</span><br>' + displayResult;
+          const curseText = activeCurse === 'cursedMultiplier' ? ' (CURSED x5)' : '';
+          resultsDiv.innerHTML = '<span style="color: gold;">BOOSTER ACTIVATED! (Luck x' + boostMultiplier.toFixed(2) + curseText + ')</span><br>' + displayResult;
           if (roll.cooldown > 0) setCooldown(roll.cooldown);
         } else if (item.type === 'specialBooster') {
           totalRolls++;
           const roll = rollOnce(1, 1, 1);
-          // Apply special luck boost directly to special ranks
           specialLuckBonus *= item.multiplier;
           multiRolls = [roll.inventoryData];
           
@@ -862,10 +951,24 @@
           
           resultsDiv.innerHTML = '<span style="color: #ff1493;">SPECIAL BOOSTER ACTIVATED! (Special Luck x' + item.multiplier.toFixed(2) + ')</span><br>' + displayResult;
           
-          // Reset special luck after roll
           specialLuckBonus = 1 + ((shopUpgrades.specialLuck || 0) * 0.1);
           
           if (roll.cooldown > 0) setCooldown(roll.cooldown);
+        } else if (item.type === 'variantBooster') {
+          totalRolls++;
+          const roll = rollOnce(1, item.multiplier, 1);
+          multiRolls = [roll.inventoryData];
+          
+          let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, 
+            `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>`);
+          
+          resultsDiv.innerHTML = '<span style="color: #a855f7;">VARIANT BOOSTER ACTIVATED! (Variant Luck x' + item.multiplier.toFixed(2) + ')</span><br>' + displayResult;
+          if (roll.cooldown > 0) setCooldown(roll.cooldown);
+        } else if (item.type === 'yinYang') {
+          resultsDiv.innerHTML = '<span style="color: #fbbf24;">Yin-Yang activated! Effect lasts for the item\'s duration in inventory.</span>';
+          saveAll();
+          renderItemInventory();
+          return;
         }
         
         itemInventory.splice(index, 1);
@@ -881,6 +984,15 @@
           merchantTimeLeft = 30;
           generateMerchantStock();
           renderMerchant();
+        }
+        
+        const hasYinYang = itemInventory.some(item => item.type === 'yinYang');
+        if (hasYinYang) {
+          yinYangTimer--;
+          if (yinYangTimer <= 0) {
+            yinYangTimer = 60;
+            yinYangState = yinYangState === 'normal' ? 'special' : 'normal';
+          }
         }
       }, 1000);
 
@@ -940,6 +1052,56 @@
         totalWinsDisplay.textContent = totalWins;
       }
 
+      function renderCurses() {
+        cursesCoinsDisplay.textContent = caliCoins.toFixed(2);
+        let html = '';
+        
+        Object.keys(CURSES).forEach(curseKey => {
+          const curse = CURSES[curseKey];
+          const isActive = activeCurse === curseKey;
+          const className = isActive ? 'curse-item active' : 'curse-item';
+          const unequipCost = (caliCoins * 0.1666).toFixed(2);
+          const equipCost = (caliCoins * 0.25).toFixed(2);
+          
+          html += `<div class="${className}">
+            <h4>${curse.name}</h4>
+            <p>${curse.description}</p>
+            ${isActive ? 
+              `<p style="color: #ef4444;">ACTIVE</p>
+               <button onclick="unequipCurse()" ${caliCoins < caliCoins * 0.1666 ? 'disabled' : ''}>Unequip (${unequipCost} coins)</button>` :
+              `<button onclick="equipCurse('${curseKey}')" ${activeCurse || caliCoins < caliCoins * 0.25 ? 'disabled' : ''}>Equip (${equipCost} coins)</button>`
+            }
+          </div>`;
+        });
+        
+        cursesContent.innerHTML = html;
+      }
+
+      window.equipCurse = function(curseKey) {
+        if (activeCurse) {
+          alert('You already have a curse equipped! Unequip it first.');
+          return;
+        }
+        
+        const cost = caliCoins * 0.25;
+        if (caliCoins < cost) return;
+        
+        caliCoins -= cost;
+        activeCurse = curseKey;
+        saveAll();
+        renderCurses();
+      };
+
+      window.unequipCurse = function() {
+        const cost = caliCoins * 0.1666;
+        if (caliCoins < cost) return;
+        
+        caliCoins -= cost;
+        activeCurse = null;
+        saveAll();
+        renderCurses();
+      };
+
       pvpRollBtn.addEventListener('click', () => {
         if (isPVPCooldown) return;
         
@@ -957,11 +1119,12 @@
           winStreak++;
           totalWins++;
           const coinsGained = 1 + (winStreak > 1 ? (winStreak - 1) * 2 : 0);
-          pvpCoins += coinsGained;
+          const finalCoins = activeCurse === 'greed' ? coinsGained * 5 : coinsGained;
+          pvpCoins += finalCoins;
           result = `<span style="color: #4ade80; font-weight: 700;">YOU WIN!</span><br>
             You rolled: ${playerRoll.inventoryData.displayValue} (${playerRoll.inventoryData.rank})<br>
             Opponent rolled: ${opponentRoll.inventoryData.displayValue} (${opponentRoll.inventoryData.rank})<br>
-            +${coinsGained} PVP Coins | Win Streak: ${winStreak}`;
+            +${finalCoins} PVP Coins${activeCurse === 'greed' ? ' (GREED x5)' : ''} | Win Streak: ${winStreak}`;
         } else {
           winStreak = 0;
           result = `<span style="color: #ef4444; font-weight: 700;">YOU LOSE!</span><br>
@@ -1067,7 +1230,7 @@
       }
 
       toggleInventoryBtn.addEventListener('click', () => {
-        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection];
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection];
         if (inventorySection.style.display === 'none') {
           sections.forEach(s => s.style.display = 'none');
           inventorySection.style.display = 'block';
@@ -1078,7 +1241,7 @@
       });
 
       toggleIndexBtn.addEventListener('click', () => {
-        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection];
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection];
         if (indexSection.style.display === 'none') {
           sections.forEach(s => s.style.display = 'none');
           indexSection.style.display = 'block';
@@ -1089,7 +1252,7 @@
       });
 
       toggleShopBtn.addEventListener('click', () => {
-        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection];
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection];
         if (shopSection.style.display === 'none') {
           sections.forEach(s => s.style.display = 'none');
           shopSection.style.display = 'block';
@@ -1100,7 +1263,7 @@
       });
 
       toggleMerchantBtn.addEventListener('click', () => {
-        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection];
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection];
         if (merchantSection.style.display === 'none') {
           sections.forEach(s => s.style.display = 'none');
           merchantSection.style.display = 'block';
@@ -1111,7 +1274,7 @@
       });
 
       toggleItemInventoryBtn.addEventListener('click', () => {
-        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection];
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection];
         if (itemInventorySection.style.display === 'none') {
           sections.forEach(s => s.style.display = 'none');
           itemInventorySection.style.display = 'block';
@@ -1122,7 +1285,7 @@
       });
 
       togglePVPBtn.addEventListener('click', () => {
-        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection];
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection];
         if (pvpSection.style.display === 'none') {
           sections.forEach(s => s.style.display = 'none');
           pvpSection.style.display = 'block';
@@ -1130,6 +1293,32 @@
           updatePVPDisplay();
         } else {
           pvpSection.style.display = 'none';
+        }
+      });
+
+      toggleCursesBtn.addEventListener('click', () => {
+        if (!cursesUnlocked) {
+          if (pvpCoins >= 250) {
+            if (confirm('Unlock Curses for 250 PVP Coins?')) {
+              pvpCoins -= 250;
+              cursesUnlocked = true;
+              saveAll();
+            } else {
+              return;
+            }
+          } else {
+            alert('You need 250 PVP Coins to unlock Curses!');
+            return;
+          }
+        }
+        
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection];
+        if (cursesSection.style.display === 'none') {
+          sections.forEach(s => s.style.display = 'none');
+          cursesSection.style.display = 'block';
+          renderCurses();
+        } else {
+          cursesSection.style.display = 'none';
         }
       });
 
@@ -1144,12 +1333,12 @@
         let html = '';
         
         const varCost = Math.floor(100 * Math.pow(1.25, shopUpgrades.variantLuck || 0));
-        const varMaxed = (shopUpgrades.variantLuck || 0) >= 20;
+        const varMaxed = (shopUpgrades.variantLuck || 0) >= 32;
         html += `<div class="shop-item">
-          <h4>+0.25x Variant Luck</h4>
+          <h4>+1x Variant Luck</h4>
           <p>Current: ${variantLuckBonus.toFixed(2)}x</p>
           <p>Cost: ${varCost} Cali-coins</p>
-          <p>Upgrades: ${shopUpgrades.variantLuck || 0}/20</p>
+          <p>Upgrades: ${shopUpgrades.variantLuck || 0}/32</p>
           ${varMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyUpgrade('variantLuck')" ${caliCoins < varCost || varMaxed ? 'disabled' : ''}>Buy</button>`}
         </div>`;
         
@@ -1239,11 +1428,11 @@
         
         if (type === 'variantLuck') {
           cost = Math.floor(100 * Math.pow(1.25, shopUpgrades.variantLuck || 0));
-          maxLevel = 20;
+          maxLevel = 32;
           if (caliCoins >= cost && (shopUpgrades.variantLuck || 0) < maxLevel) {
             caliCoins -= cost;
             shopUpgrades.variantLuck = (shopUpgrades.variantLuck || 0) + 1;
-            variantLuckBonus = 1 + (shopUpgrades.variantLuck * 0.25);
+            variantLuckBonus = 1 + shopUpgrades.variantLuck;
           }
         } else if (type === 'rollBulk') {
           cost = Math.floor(50 * Math.pow(1.05, shopUpgrades.rollBulk));
@@ -1336,8 +1525,10 @@
             totalWins = shopData.totalWins || 0;
             pvpUpgrades = shopData.pvpUpgrades || { bulkRoll: 0, rngExponent: 0 };
             itemInventory = shopData.itemInventory || [];
+            activeCurse = shopData.activeCurse || null;
+            cursesUnlocked = shopData.cursesUnlocked || false;
             
-            variantLuckBonus = 1 + ((shopUpgrades.variantLuck || 0) * 0.25);
+            variantLuckBonus = 1 + (shopUpgrades.variantLuck || 0);
             secretLuckBonus = 1 + ((shopUpgrades.secretLuck || 0) * 0.05);
             specialLuckBonus = 1 + ((shopUpgrades.specialLuck || 0) * 0.1);
             generalLuckBonus = 1 + ((shopUpgrades.generalLuck || 0) * 0.05);
@@ -1369,7 +1560,9 @@
           winStreak: winStreak,
           totalWins: totalWins,
           pvpUpgrades: pvpUpgrades,
-          itemInventory: itemInventory
+          itemInventory: itemInventory,
+          activeCurse: activeCurse,
+          cursesUnlocked: cursesUnlocked
         };
         localStorage.setItem('calisRngShop', JSON.stringify(shopData));
         updateCoinsDisplay();
@@ -1382,6 +1575,7 @@
       function updateCoinsDisplay() {
         coinsDisplay.textContent = caliCoins.toFixed(2);
         merchantCoinsDisplay.textContent = caliCoins.toFixed(2);
+        cursesCoinsDisplay.textContent = caliCoins.toFixed(2);
         rollMultipleBtn.textContent = `Roll ${rollBulk} Times`;
       }
 
@@ -1464,12 +1658,14 @@
         }
         
         const coins = Math.pow(Math.abs(numericValue), sellExponent);
-        caliCoins += coins;
+        const finalCoins = activeCurse === 'greed' ? coins * 5 : coins;
+        caliCoins += finalCoins;
         
         inventory.splice(index, 1);
         saveAll();
         
-        alert(`Sold for ${coins.toFixed(2)} Cali-coins!`);
+        const curseText = activeCurse === 'greed' ? ' (GREED x5)' : '';
+        alert(`Sold for ${finalCoins.toFixed(2)} Cali-coins!${curseText}`);
       }
 
       function deleteItem(index) {
@@ -1565,8 +1761,35 @@
       }
 
       function rollOnce(luckMultiplier = 1, variantLuckMultiplier = 1, secretLuckMultiplier = 1, isCheese = false) {
+        if (Math.random() < 1/890000) {
+          markDiscovered('specialRanks', 'pepeCringe');
+          const invData = {
+            variants: '',
+            displayValue: '🐸',
+            rank: 'pepeCringe',
+            color: '#4ade80'
+          };
+          return { result: '<span class="bold" style="color: #4ade80;">You rolled a/an RANKBUTTON (🐸)!</span>', cooldown: 3000, inventoryData: invData };
+        }
+        
+        if (activeCurse === 'greed') {
+          luckMultiplier /= 10;
+          variantLuckMultiplier /= 10;
+          secretLuckMultiplier /= 10;
+        }
+        
+        const hasYinYang = itemInventory.some(item => item.type === 'yinYang');
+        if (hasYinYang) {
+          if (yinYangState === 'normal') {
+            luckMultiplier *= 100;
+            secretLuckMultiplier = 0;
+          } else {
+            luckMultiplier = 0;
+            secretLuckMultiplier *= 100000;
+          }
+        }
+        
         luckMultiplier *= generalLuckBonus;
-        variantLuckMultiplier *= generalLuckBonus;
         secretLuckMultiplier *= generalLuckBonus;
         
         let blessingBonus = 0;
@@ -1579,7 +1802,6 @@
         }
         
         luckMultiplier += blessingBonus;
-        variantLuckMultiplier += blessingBonus;
         secretLuckMultiplier += blessingBonus;
         
         let isSpecial = false;
@@ -1598,7 +1820,6 @@
           return { result: '<span class="bold" style="color: #FFD700;">You rolled a/an RANKBUTTON (🧀)!</span>', cooldown: 2500, inventoryData: invData };
         }
 
-        // RNGarbage 1/15,629,519
         if (Math.random() < (1 / 15629519) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'RNGarbage');
@@ -1611,7 +1832,6 @@
           return { result: '<span class="bold" style="color: brown;">You rolled a/an RANKBUTTON (Bum..)!</span>', cooldown: 2500, inventoryData: invData };
         }
 
-        // RNGod 1/50,000,000
         if (Math.random() < (1 / 1000000) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'RNGod');
@@ -1624,7 +1844,6 @@
           return { result: '<span class="bold" style="color: gold;">You rolled a/an RANKBUTTON (1.0000e+6)!</span>', cooldown: 5000, inventoryData: invData };
         }
 
-        // Everlasting 1/575,765,100
         if (Math.random() < (1 / 575765100) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'Everlasting');
@@ -1637,7 +1856,6 @@
           return { result: '<span class="bold" style="color: cyan;">You rolled a/an RANKBUTTON (0i)!</span>', cooldown: 2500, inventoryData: invData };
         }
 
-        // UNOBTAINABLE 1/1,000,000,000
         if (Math.random() < (1 / 1000000000) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'UNOBTAINABLE');
@@ -1650,7 +1868,6 @@
           return { result: '<span class="bold" style="color: red;">You rolled a/an RANKBUTTON (1.0000e+9)!</span>', cooldown: 2500, inventoryData: invData };
         }
 
-        // Legacy FINALE 1/75,000,000
         if (Math.random() < (1 / 75000000) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'Legacy FINALE');
@@ -1663,7 +1880,6 @@
           return { result: '<span class="bold" style="color: gold;">You rolled a/an RANKBUTTON (1.0000e+10)!</span>', cooldown: 5000, inventoryData: invData };
         }
 
-        // <(ETERNAL DAWN)> 1/77,777,777
         if (Math.random() < (1 / 77777777) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', '<(ETERNAL DAWN)>');
@@ -1676,7 +1892,6 @@
           return { result: '<span class="bold" style="color: purple;">You rolled a/an RANKBUTTON (-777,777,777.78)!</span>', cooldown: 4500, inventoryData: invData };
         }
 
-        // Catastrophic 1/3906250
         if (Math.random() < (1 / 3906250) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'Catastrophic');
@@ -1689,7 +1904,6 @@
           return { result: '<span class="bold" style="color: red;">You rolled a/an RANKBUTTON (-0.50)!</span>', cooldown: 3500, inventoryData: invData };
         }
 
-        // In im table ?!?!? 1/3.75m
         if (Math.random() < (1 / 3750000) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'In im table ?!?!?');
@@ -1702,7 +1916,6 @@
           return { result: '<span class="bold">You rolled a/an RANKBUTTON (1einf)!</span>', cooldown: 2500, inventoryData: invData };
         }
 
-        // ???UNKNOWN??? 1/1234567 - NO COOLDOWN
         if (Math.random() < (1 / 1234567) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', '???UNKNOWN???');
@@ -1715,7 +1928,6 @@
           return { result: '<span class="bold">You rolled a/an RANKBUTTON (???)!</span>', cooldown: 0, inventoryData: invData };
         }
 
-        // Invisible 1/500000
         if (Math.random() < (1 / 5000000) * specialLuckBonus) {
           isSpecial = true;
           originalValue = Math.random() * 50000000;
@@ -1729,7 +1941,6 @@
           return { result: '<span class="bold" style="color: rgba(255, 192, 203, 0.2);">You rolled a/an RANKBUTTON (' + originalValue.toFixed(2) + ')!</span>', cooldown: 2500, inventoryData: invData };
         }
 
-        // cali 1/10,000,000 (only if availability unlocked)
         if (availabilityUnlocked && Math.random() < (1 / 10000000) * specialLuckBonus) {
           isSpecial = true;
           markDiscovered('specialRanks', 'cali');
@@ -2056,7 +2267,7 @@
 
         const rankButton = `<button class="rank-button" id="rank-btn-ROLLINDEX" onclick="acceptRoll(ROLLINDEX)">${rank}</button>`;
 
-        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>','UNOBTAINABLE','Everlasting','RNGod','Invisible','cali','RNGarbage','leaflet','Cheesium'].includes(rank)) {
+        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>','UNOBTAINABLE','Everlasting','RNGod','Invisible','cali','RNGarbage','leaflet','Cheesium','pepeCringe'].includes(rank)) {
           if (color.startsWith('linear-gradient')) {
             result += `<span class="bold" style="background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">You rolled a/an RANKBUTTON (${dispValue})!</span>`;
           } else {
