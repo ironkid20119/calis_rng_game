@@ -657,6 +657,8 @@
       let currentAudio = null;
       let musicPaused = false;
       let musicStarted = false;
+      let nullDisplayIndex = 0;
+      const nullDisplayValues = ["0", "null", "-404", "-503", "[Label Missing]"];
       
       let shopUpgrades = {
         variantLuck: 0,
@@ -667,7 +669,8 @@
         sellPower: 0,
         availability: false,
         calisBlessing: false,
-        blessingBooster: false
+        blessingBooster: false,
+        extraAvailability: false
       };
       
       let pvpUpgrades = {
@@ -685,6 +688,11 @@
           name: 'Cursed Multiplier',
           description: 'Every booster is x5 better, but 1/2.5 chance to ruin roll (gives 1.01 with no variants)',
           pvpCost: 250
+        },
+        yinYang: {
+          name: 'Yin-Yang',
+          description: 'Every minute, switches between x100 normal luck/x0 special and x0 normal/x100,000 special',
+          pvpCost: 500
         }
       };
       
@@ -693,7 +701,7 @@
 
       const ALL_RANKS = ['nothing', 'Common', 'Natural', 'Rare', 'Unnatural', 'Epic', 'Decent', 'Mythical', 'Legendary', 'Unreal', 'Super Rare', 'Eternal', 'Starstruck', 'Paradoxical', 'Iridescent', 'Lux', 'Possible', 'RNGesus', 'CRAZY', 'Supreme', 'DAMN', 'Stupiditium', 'ASCENDED', 'Obscure', 'INFINITE', 'Divine', 'Insurmountable', 'GRAND', 'what.', 'FINALE', 'Microb', 'Attainable', 'Directional', 'Limitless', 'Endless'];
       
-      const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>', 'UNOBTAINABLE', 'Everlasting', 'RNGod', 'Invisible', 'cali', 'RNGarbage', 'Cheesium', 'pepeCringe', 'EZ', 'The Great Special Rank With An Unnecessary Long Name, Anyways Are You Even Reading This? I Bet Not. If You Are Good Job Cuz You Wasted Time On This, Why? Anyways, Be Happy You Rolled This. Its The Rarest Special Rank. Haha I Am Making You Read This Weird Rank Name Anyways So What? Its Just A RNG Game Rank Anyways  Just Stop. You Did Too Much Reading For A Simple RNG Game Bro I Am Telling You Stop Its Just A Rank Of All Things', '100'];
+      const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>', 'UNOBTAINABLE', 'Everlasting', 'RNGod', 'Invisible', 'cali', 'RNGarbage', 'Cheesium', 'pepeCringe', 'EZ', 'The Great Special Rank With An Unnecessary Long Name, Anyways Are You Even Reading This? I Bet Not. If You Are Good Job Cuz You Wasted Time On This, Why? Anyways, Be Happy You Rolled This. Its The Rarest Special Rank. Haha I Am Making You Read This Weird Rank Name Anyways So What? Its Just A RNG Game Rank Anyways  Just Stop. You Did Too Much Reading For A Simple RNG Game Bro I Am Telling You Stop Its Just A Rank Of All Things', '100', 'NULL', '[Title Label Missing]'];
       
       const ALL_SECRET_RANKS = ['🐟', 'Destiny', '🌳', 'ULTIMATE'];
       
@@ -777,6 +785,42 @@
         for (let i = 0; i < 12; i++) {
           const rand = Math.random();
           
+          if (shopUpgrades.extraAvailability) {
+            if (rand < 1/20) {
+              merchantStock.push({
+                name: 'Self-Insert Rigger',
+                cost: 77777,
+                description: '1/10 chance to force "cali"',
+                type: 'selfInsertRigger'
+              });
+              continue;
+            } else if (rand < 1/20 + 1/25) {
+              merchantStock.push({
+                name: 'Undetermined',
+                cost: 6666,
+                description: '1/66.66 to roll "NULL", 1/6.66 to be consumed',
+                type: 'undetermined'
+              });
+              continue;
+            } else if (rand < 1/20 + 1/25 + 1/50) {
+              merchantStock.push({
+                name: 'Grand Booster',
+                cost: 1000000,
+                description: 'x1,000,000,000 rank luck',
+                type: 'grandBooster'
+              });
+              continue;
+            } else if (rand < 1/20 + 1/25 + 1/50 + 1/100) {
+              merchantStock.push({
+                name: 'DEV ITEM',
+                cost: 1,
+                description: 'Forces "Lmao"',
+                type: 'devItem'
+              });
+              continue;
+            }
+          }
+          
           if (rand < 1/10) {
             merchantStock.push({
               name: 'Cheese',
@@ -802,7 +846,7 @@
               type: 'specialBooster'
             });
           } else if (rand < 1/10 + 1/60 + 1/100 + 1/10) {
-            const multiplier = Math.pow(Math.random(), -2.5);
+            const multiplier = 100 + Math.pow(Math.random(), -2);
             const cost = Math.floor(Math.pow(multiplier, 1.25));
             merchantStock.push({
               name: 'Variant Booster',
@@ -812,11 +856,14 @@
               type: 'variantBooster'
             });
           } else if (rand < 1/10 + 1/60 + 1/100 + 1/10 + 1/200) {
+            const multiplier = Math.pow(Math.random(), -2.5);
+            const cost = Math.floor(Math.pow(multiplier, 1.25));
             merchantStock.push({
-              name: 'Yin-Yang',
-              cost: 500,
-              description: 'Every minute, switches between x100 normal luck/x0 special and x0 normal/x100,000 special',
-              type: 'yinYang'
+              name: 'Booster',
+              cost: cost,
+              description: `Multiplies rank luck by ${multiplier.toFixed(2)}x`,
+              multiplier: multiplier,
+              type: 'booster'
             });
           } else {
             const multiplier = Math.pow(Math.random(), -2.5);
@@ -824,7 +871,7 @@
             merchantStock.push({
               name: 'Booster',
               cost: cost,
-              description: `Multiplies luck by ${multiplier.toFixed(2)}x`,
+              description: `Multiplies rank luck by ${multiplier.toFixed(2)}x`,
               multiplier: multiplier,
               type: 'booster'
             });
@@ -928,6 +975,73 @@
           };
           multiRolls = [invData];
           resultsDiv.innerHTML = '<span style="color: #ef4444; font-weight: 700;">SO EVIL!!!</span><br><span>You rolled a/an 1.00 <button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">nothing</button>!</span>';
+        } else if (item.type === 'selfInsertRigger') {
+          if (Math.random() < 1/10) {
+            totalRolls++;
+            markDiscovered('specialRanks', 'cali');
+            const invData = {
+              variants: '',
+              displayValue: '-1,581,532,333.00',
+              rank: 'cali',
+              color: 'pink'
+            };
+            multiRolls = [invData];
+            resultsDiv.innerHTML = '<span class="bold" style="color: magenta;">You rolled a/an <button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">cali</button> (-1,581,532,333.00)!</span>';
+          } else {
+            resultsDiv.innerHTML = '<span style="color: yellow;">The rigger failed...</span>';
+            itemInventory.splice(index, 1);
+            saveAll();
+            renderItemInventory();
+            return;
+          }
+        } else if (item.type === 'undetermined') {
+          if (Math.random() < 1/6.66) {
+            itemInventory.splice(index, 1);
+            saveAll();
+            renderItemInventory();
+            resultsDiv.innerHTML = '<span style="color: #ef4444;">The Undetermined consumed itself!</span>';
+            return;
+          }
+          
+          if (Math.random() < 1/66.66) {
+            totalRolls++;
+            markDiscovered('specialRanks', 'NULL');
+            const invData = {
+              variants: '',
+              displayValue: nullDisplayValues[nullDisplayIndex],
+              rank: 'NULL',
+              color: '#888'
+            };
+            multiRolls = [invData];
+            resultsDiv.innerHTML = '<span class="bold" style="color: #888;">You rolled a/an <button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">NULL</button> (' + nullDisplayValues[nullDisplayIndex] + ')!</span>';
+          } else {
+            resultsDiv.innerHTML = '<span style="color: yellow;">Nothing happened...</span>';
+            itemInventory.splice(index, 1);
+            saveAll();
+            renderItemInventory();
+            return;
+          }
+        } else if (item.type === 'grandBooster') {
+          totalRolls++;
+          const roll = rollOnce(1000000000, 1, 1);
+          multiRolls = [roll.inventoryData];
+          
+          let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, 
+            `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>`);
+          
+          resultsDiv.innerHTML = '<span style="color: gold;">GRAND BOOSTER! (Rank Luck x1,000,000,000)</span><br>' + displayResult;
+          if (roll.cooldown > 0) setCooldown(roll.cooldown);
+        } else if (item.type === 'devItem') {
+          totalRolls++;
+          markDiscovered('specialRanks', 'Lmao');
+          const invData = {
+            variants: '',
+            displayValue: '0.1',
+            rank: 'Lmao',
+            color: 'white'
+          };
+          multiRolls = [invData];
+          resultsDiv.innerHTML = '<span class="bold">You rolled a/an <button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">Lmao</button> (0.1)!</span>';
         } else if (item.type === 'booster') {
           let boostMultiplier = item.multiplier;
           if (activeCurse === 'cursedMultiplier') {
@@ -949,28 +1063,24 @@
           }
           
           totalRolls++;
-          const roll = rollOnce(boostMultiplier, boostMultiplier, boostMultiplier);
+          const roll = rollOnce(boostMultiplier, 1, 1);
           multiRolls = [roll.inventoryData];
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, 
             `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>`);
           
           const curseText = activeCurse === 'cursedMultiplier' ? ' (CURSED x5)' : '';
-          resultsDiv.innerHTML = '<span style="color: gold;">BOOSTER ACTIVATED! (Luck x' + boostMultiplier.toFixed(2) + curseText + ')</span><br>' + displayResult;
+          resultsDiv.innerHTML = '<span style="color: gold;">BOOSTER ACTIVATED! (Rank Luck x' + boostMultiplier.toFixed(2) + curseText + ')</span><br>' + displayResult;
           if (roll.cooldown > 0) setCooldown(roll.cooldown);
         } else if (item.type === 'specialBooster') {
           totalRolls++;
-          const roll = rollOnce(1, 1, 1);
-          specialLuckBonus *= item.multiplier;
+          const roll = rollOnce(1, 1, item.multiplier);
           multiRolls = [roll.inventoryData];
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, 
             `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>`);
           
           resultsDiv.innerHTML = '<span style="color: #ff1493;">SPECIAL BOOSTER ACTIVATED! (Special Luck x' + item.multiplier.toFixed(2) + ')</span><br>' + displayResult;
-          
-          specialLuckBonus = 1 + ((shopUpgrades.specialLuck || 0) * 0.1);
-          
           if (roll.cooldown > 0) setCooldown(roll.cooldown);
         } else if (item.type === 'variantBooster') {
           totalRolls++;
@@ -982,11 +1092,6 @@
           
           resultsDiv.innerHTML = '<span style="color: #a855f7;">VARIANT BOOSTER ACTIVATED! (Variant Luck x' + item.multiplier.toFixed(2) + ')</span><br>' + displayResult;
           if (roll.cooldown > 0) setCooldown(roll.cooldown);
-        } else if (item.type === 'yinYang') {
-          resultsDiv.innerHTML = '<span style="color: #fbbf24;">Yin-Yang activated! Effect lasts for the item\'s duration in inventory.</span>';
-          saveAll();
-          renderItemInventory();
-          return;
         }
         
         itemInventory.splice(index, 1);
@@ -1004,15 +1109,16 @@
           renderMerchant();
         }
         
-        const hasYinYang = itemInventory.some(item => item.type === 'yinYang');
-        if (hasYinYang) {
+        if (activeCurse === 'yinYang') {
           yinYangTimer--;
           if (yinYangTimer <= 0) {
             yinYangTimer = 60;
             yinYangState = yinYangState === 'normal' ? 'special' : 'normal';
           }
         }
-      }, 1000);
+        
+        nullDisplayIndex = (nullDisplayIndex + 1) % nullDisplayValues.length;
+      }, 5);
 
       function renderPVPUpgrades() {
         let html = '';
@@ -1035,6 +1141,13 @@
           <p>Cost: ${expCost} PVP Coins</p>
           <p>Upgrades: ${pvpUpgrades.rngExponent}/5</p>
           ${expMaxed ? '<p class="maxed">MAXED</p>' : `<button onclick="buyPVPUpgrade('rngExponent')" ${pvpCoins < expCost || expMaxed ? 'disabled' : ''}>Buy</button>`}
+        </div>`;
+        
+        html += `<div class="shop-item">
+          <h4>EXTRA Availability</h4>
+          <p>Unlocks special merchant items</p>
+          <p>Cost: 100 PVP Coins</p>
+          ${shopUpgrades.extraAvailability ? '<p class="maxed">PURCHASED</p>' : `<button onclick="buyPVPUpgrade('extraAvailability')" ${pvpCoins < 100 || shopUpgrades.extraAvailability ? 'disabled' : ''}>Buy</button>`}
         </div>`;
         
         pvpUpgradesContent.innerHTML = html;
@@ -1060,6 +1173,16 @@
             saveAll();
             renderPVPUpgrades();
             updatePVPDisplay();
+          }
+        } else if (type === 'extraAvailability') {
+          if (pvpCoins >= 100 && !shopUpgrades.extraAvailability) {
+            pvpCoins -= 100;
+            shopUpgrades.extraAvailability = true;
+            saveAll();
+            renderPVPUpgrades();
+            updatePVPDisplay();
+            generateMerchantStock();
+            renderMerchant();
           }
         }
       };
@@ -1123,8 +1246,8 @@
       pvpRollBtn.addEventListener('click', () => {
         if (isPVPCooldown) return;
         
-        const playerRoll = rollOnce(1, 1, 1);
-        const opponentRoll = rollOnce(1, 1, 1);
+        const playerRoll = rollOnce(1, 1, 1, false, true);
+        const opponentRoll = rollOnce(1, 1, 1, false, true);
         
         let playerValue = parseFloat(playerRoll.inventoryData.displayValue.replace(/,/g, ''));
         let opponentValue = parseFloat(opponentRoll.inventoryData.displayValue.replace(/,/g, ''));
@@ -1157,17 +1280,17 @@
         
         isPVPCooldown = true;
         pvpRollBtn.disabled = true;
-        let remaining = 1;
+        let remaining = 2.5;
         const interval = setInterval(() => {
-          pvpRollBtn.textContent = `Cooldown: ${remaining}s`;
-          remaining--;
-          if (remaining < 0) {
+          pvpRollBtn.textContent = `Cooldown: ${remaining.toFixed(1)}s`;
+          remaining -= 0.1;
+          if (remaining <= 0) {
             clearInterval(interval);
             pvpRollBtn.disabled = false;
             pvpRollBtn.textContent = 'Roll Against Opponent';
             isPVPCooldown = false;
           }
-        }, 1000);
+        }, 100);
       });
 
       function loadDiscovered() {
@@ -1217,6 +1340,11 @@
         ALL_SPECIAL_RANKS.forEach(r => {
           if (r === 'cali' && !availabilityUnlocked) {
             html += `<div class="index-item undiscovered">✗ ???</div>`;
+          } else if (r === 'NULL') {
+            const isDiscovered = discovered.specialRanks.includes(r);
+            const icon = isDiscovered ? '✓' : '✗';
+            const className = isDiscovered ? 'discovered' : 'undiscovered';
+            html += `<div class="index-item ${className}">${icon} [Error]</div>`;
           } else {
             const isDiscovered = discovered.specialRanks.includes(r);
             const icon = isDiscovered ? '✓' : '✗';
@@ -1537,7 +1665,7 @@
             const shopData = JSON.parse(shopSaved);
             caliCoins = shopData.coins || 0;
             totalRolls = shopData.totalRolls || 0;
-            shopUpgrades = shopData.upgrades || { variantLuck: 0, rollBulk: 0, secretLuck: 0, specialLuck: 0, generalLuck: 0, sellPower: 0, availability: false, calisBlessing: false, blessingBooster: false };
+            shopUpgrades = shopData.upgrades || { variantLuck: 0, rollBulk: 0, secretLuck: 0, specialLuck: 0, generalLuck: 0, sellPower: 0, availability: false, calisBlessing: false, blessingBooster: false, extraAvailability: false };
             pvpCoins = shopData.pvpCoins || 0;
             winStreak = shopData.winStreak || 0;
             totalWins = shopData.totalWins || 0;
@@ -1778,8 +1906,19 @@
         return 'linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet)';
       }
 
-      function rollOnce(luckMultiplier = 1, variantLuckMultiplier = 1, secretLuckMultiplier = 1, isCheese = false) {
-        if (Math.random() < 1/900900900.900 * specialLuckBonus) {
+      function rollOnce(luckMultiplier = 1, variantLuckMultiplier = 1, secretLuckMultiplier = 1, isCheese = false, isPVP = false) {
+        if (!isPVP && Math.random() < 1/517927735 * specialLuckBonus) {
+          markDiscovered('specialRanks', '[Title Label Missing]');
+          const invData = {
+            variants: '',
+            displayValue: 'NaN',
+            rank: '[Title Label Missing]',
+            color: '#888'
+          };
+          return { result: '<span class="bold" style="color: #888;">You rolled a/an RANKBUTTON (NaN)!</span>', cooldown: 0, inventoryData: invData };
+        }
+        
+        if (!isPVP && Math.random() < 1/900900900.900 * specialLuckBonus) {
           markDiscovered('specialRanks', 'EZ');
           const invData = {
             variants: '',
@@ -1829,8 +1968,13 @@
           secretLuckMultiplier /= 10;
         }
         
-        const hasYinYang = itemInventory.some(item => item.type === 'yinYang');
-        if (hasYinYang) {
+        if (activeCurse === 'yinYang') {
+          yinYangTimer--;
+          if (yinYangTimer <= 0) {
+            yinYangTimer = 60;
+            yinYangState = yinYangState === 'normal' ? 'special' : 'normal';
+          }
+          
           if (yinYangState === 'normal') {
             luckMultiplier *= 100;
             secretLuckMultiplier = 0;
@@ -1992,16 +2136,20 @@
           return { result: '<span class="bold" style="color: rgba(255, 192, 203, 0.2);">You rolled a/an RANKBUTTON (' + originalValue.toFixed(2) + ')!</span>', cooldown: 2500, inventoryData: invData };
         }
 
-        let base = Math.random();
-        let skewed;
-        if (base < 0.5) skewed = 1 + Math.random() * 180;
-        else if (base < 0.75) skewed = 10 + Math.random() * 1800;
-        else if (base < 0.90) skewed = 100 + Math.random() * 18000;
-        else if (base < 0.97) skewed = 1000 + Math.random() * 180000;
-        else if (base < 0.99) skewed = 10000 + Math.random() * 1800000;
-        else if (base < 0.997) skewed = 100000 + Math.random() * 18000000;
-        else if (base < 0.9995) skewed = 1000000 + Math.random() * 180000000;
-        else skewed = 10000000 + Math.random() * 18000000000;
+        if (availabilityUnlocked && Math.random() < (1 / 10000000) * specialLuckBonus) {
+          isSpecial = true;
+          markDiscovered('specialRanks', 'cali');
+          const invData = {
+            variants: '',
+            displayValue: '-1,581,532,333.00',
+            rank: 'cali',
+            color: 'pink'
+          };
+          return { result: '<span class="bold" style="color: magenta;">You rolled a/an RANKBUTTON (-1,581,532,333.00)!</span>', cooldown: 5000, inventoryData: invData };
+        }
+
+        let base = Math.pow(Math.random(), -1.9);
+        let skewed = base;
 
         skewed = Math.max(1, skewed);
         if (Math.random() < 1 / 1000) skewed = -1;
@@ -2027,7 +2175,7 @@
         let secretRank = null;
         let secretMultiplier = 1;
 
-        if (Math.random() < (1 / 88888) * secretLuckMultiplier) {
+        if (!isPVP && Math.random() < (1 / 88888) * secretLuckMultiplier) {
           secretRank = 'ULTIMATE';
           secretMultiplier = 750;
           markDiscovered('secretRanks', 'ULTIMATE');
@@ -2076,20 +2224,22 @@
         let variantMultiplier = 1;
         let discoveredVariants = [];
 
-        variants.forEach(v => {
-          if (Math.random() < v.chance * variantLuckMultiplier * variantLuckBonus) {
-            variantMultiplier *= v.multiplier;
-            variantText += `[${v.name.toUpperCase()}] `;
-            discoveredVariants.push(v.name);
-            markDiscovered('variants', v.name);
-          }
-        });
+        if (!isPVP) {
+          variants.forEach(v => {
+            if (Math.random() < v.chance * variantLuckMultiplier * variantLuckBonus) {
+              variantMultiplier *= v.multiplier;
+              variantText += `[${v.name.toUpperCase()}] `;
+              discoveredVariants.push(v.name);
+              markDiscovered('variants', v.name);
+            }
+          });
+        }
 
         let variantSecret = null;
         let variantSecretMultiplier = 1;
         let removeVariant = null;
 
-        if (discoveredVariants.includes('Gigaconfuscibretrationiminousis')) {
+        if (!isPVP && discoveredVariants.includes('Gigaconfuscibretrationiminousis')) {
           if (Math.random() < 1 / 2.5) {
             variantSecret = 'COLOSSAL';
             variantSecretMultiplier = 25000000;
@@ -2102,14 +2252,14 @@
         let rank = '';
         let displayValue = baseValue;
 
-        if (Math.random() < 1 / 98900 * specialLuckBonus) { 
+        if (!isPVP && Math.random() < 1 / 98900 * specialLuckBonus) { 
           rank = 'INSANE'; 
           displayValue = 0.989; 
           originalValue = 0.989;
           isSpecial = true;
           markDiscovered('specialRanks', 'INSANE');
         }
-        else if (Math.random() < 1 / 150000 * specialLuckBonus) { 
+        else if (!isPVP && Math.random() < 1 / 150000 * specialLuckBonus) { 
           rank = 'Lmao'; 
           displayValue = 0.1;
           originalValue = 0.1;
@@ -2122,7 +2272,7 @@
           isSpecial = true;
           markDiscovered('specialRanks', 'PERFECTIONIST');
         }
-        else if (Math.random() < 1 / 88888 * specialLuckBonus) { 
+        else if (!isPVP && Math.random() < 1 / 88888 * specialLuckBonus) { 
           rank = "Imaginary"; 
           displayValue = "0.1i";
           originalValue = 0.1;
@@ -2148,14 +2298,14 @@
           rank = 'nothing';
           markDiscovered('ranks', 'nothing');
         }
-        else if (Math.random() < 1 / 690000 * specialLuckBonus) { 
+        else if (!isPVP && Math.random() < 1 / 690000 * specialLuckBonus) { 
           rank = 'NICE';
           displayValue = 69;
           originalValue = 69;
           isSpecial = true;
           markDiscovered('specialRanks', 'NICE');
         }
-        else if (Math.random() < 1 / 6942000 * specialLuckBonus) { 
+        else if (!isPVP && Math.random() < 1 / 6942000 * specialLuckBonus) { 
           rank = 'FUNNY';
           displayValue = 69420;
           originalValue = 69420;
@@ -2163,7 +2313,7 @@
           markDiscovered('specialRanks', 'FUNNY');
         }
         else if (absBaseValue < 5) {
-          if (Math.random() < 1 / 3333333 * specialLuckBonus) { 
+          if (!isPVP && Math.random() < 1 / 3333333 * specialLuckBonus) { 
             rank = 'Common : DIVINITY'; 
             displayValue *= 5e5;
             isSpecial = true;
@@ -2208,7 +2358,7 @@
         else if (absBaseValue < 1e150) { rank = 'what.'; markDiscovered('ranks', 'what.'); }
         else { rank = 'FINALE'; markDiscovered('ranks', 'FINALE'); }
 
-        if (Math.random() < (1 / 276300 * specialLuckBonus)) {
+        if (!isPVP && Math.random() < (1 / 276300 * specialLuckBonus)) {
           isSpecial = true;
           rank = 'leaflet';
           displayValue = 2763;
@@ -2313,7 +2463,7 @@
 
         const rankButton = `<button class="rank-button" id="rank-btn-ROLLINDEX" onclick="acceptRoll(ROLLINDEX)">${rank}</button>`;
 
-        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>','UNOBTAINABLE','Everlasting','RNGod','Invisible','cali','RNGarbage','leaflet','Cheesium','pepeCringe','EZ','The Great Special Rank With An Unnecessary Long Name, Anyways Are You Even Reading This? I Bet Not. If You Are Good Job Cuz You Wasted Time On This, Why? Anyways, Be Happy You Rolled This. Its The Rarest Special Rank. Haha I Am Making You Read This Weird Rank Name Anyways So What? Its Just A RNG Game Rank Anyways  Just Stop. You Did Too Much Reading For A Simple RNG Game Bro I Am Telling You Stop Its Just A Rank Of All Things','100'].includes(rank)) {
+        if (['Lmao','FUNNY','NICE','nil','NOTHINGNESS','PERFECTIONIST','In im table ?!?!?','INSANE','Common : DIVINITY','Imaginary','???UNKNOWN???','Legacy FINALE','Catastrophic','<(ETERNAL DAWN)>','UNOBTAINABLE','Everlasting','RNGod','Invisible','cali','RNGarbage','leaflet','Cheesium','pepeCringe','EZ','The Great Special Rank With An Unnecessary Long Name, Anyways Are You Even Reading This? I Bet Not. If You Are Good Job Cuz You Wasted Time On This, Why? Anyways, Be Happy You Rolled This. Its The Rarest Special Rank. Haha I Am Making You Read This Weird Rank Name Anyways So What? Its Just A RNG Game Rank Anyways  Just Stop. You Did Too Much Reading For A Simple RNG Game Bro I Am Telling You Stop Its Just A Rank Of All Things','100','NULL','[Title Label Missing]'].includes(rank)) {
           if (color.startsWith('linear-gradient')) {
             result += `<span class="bold" style="background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">You rolled a/an RANKBUTTON (${dispValue})!</span>`;
           } else {
@@ -2329,7 +2479,7 @@
 
         let cooldown = 0;
         if (isSpecial && !noCooldownRanks.includes(rank)) {
-          cooldown = 1000;
+          cooldown = 100;
         } else if (absDisplayValue >= 1e35) {
           cooldown = 1500;
         }
@@ -2349,7 +2499,7 @@
         multiRolls = [];
         totalRolls++;
         saveAll();
-        const roll = rollOnce(25, 25, 100 * secretLuckBonus);
+        const roll = rollOnce(33, 33, 100 * secretLuckBonus);
         multiRolls.push(roll.inventoryData);
         
         let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
@@ -2387,7 +2537,7 @@
       rollSpecialLuckBtn.addEventListener('click', () => {
         if (isCooldown) return;
         if (caliCoins < 1e35) {
-          alert('Not enough coins! You need 1e35 Cali-coins.');
+          alert('Not enough coins! You need 1e50 Cali-coins.');
           return;
         }
         
