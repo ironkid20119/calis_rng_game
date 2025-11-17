@@ -211,6 +211,14 @@
         background-color: #f0c748;
       }
 
+      #toggleCooldownSettings {
+        background-color: #3b82f6;
+      }
+
+      #toggleCooldownSettings:hover {
+        background-color: #60a5fa;
+      }
+
       #toggleSellMode {
         background-color: #ff6b35;
       }
@@ -509,6 +517,7 @@
       <button id="toggleItemInventory">Toggle Item Inventory</button>
       <button id="togglePVP">Toggle PVP</button>
       <button id="toggleCurses">Toggle Curses</button>
+      <button id="toggleCooldownSettings">Cooldown Settings</button>
       <button id="toggleSellMode">Sell Mode: OFF</button>
 
       <div id="results"></div>
@@ -571,6 +580,24 @@
         <h2>Discovery Index</h2>
         <div id="indexContent"></div>
       </div>
+
+      <div class="index-section" id="cooldownSettingsSection" style="display: none;">
+        <h2>Cooldown Settings</h2>
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 10px;">
+            <input type="checkbox" id="enableSpecialCooldowns" checked> Enable cooldowns for special ranks
+          </label>
+          <label style="display: block; margin-bottom: 10px;">
+            Value threshold for cooldowns (scientific notation supported):
+            <input type="text" id="cooldownThreshold" value="1e35" style="margin-left: 10px; padding: 5px; width: 150px;">
+          </label>
+          <label style="display: block; margin-bottom: 10px;">
+            Cooldown duration (seconds, 1-5):
+            <input type="number" id="cooldownDuration" value="1.5" min="1" max="5" step="0.1" style="margin-left: 10px; padding: 5px; width: 100px;">
+          </label>
+          <button onclick="saveCooldownSettings()" style="margin-top: 10px;">Save Settings</button>
+        </div>
+      </div>
     </div>
 
     <div class="music-control">
@@ -592,6 +619,7 @@
       const toggleItemInventoryBtn = document.getElementById('toggleItemInventory');
       const togglePVPBtn = document.getElementById('togglePVP');
       const toggleCursesBtn = document.getElementById('toggleCurses');
+      const toggleCooldownSettingsBtn = document.getElementById('toggleCooldownSettings');
       const toggleSellModeBtn = document.getElementById('toggleSellMode');
       const inventorySection = document.getElementById('inventorySection');
       const indexSection = document.getElementById('indexSection');
@@ -600,6 +628,7 @@
       const itemInventorySection = document.getElementById('itemInventorySection');
       const pvpSection = document.getElementById('pvpSection');
       const cursesSection = document.getElementById('cursesSection');
+      const cooldownSettingsSection = document.getElementById('cooldownSettingsSection');
       const pvpRollBtn = document.getElementById('pvpRollBtn');
       const indexContent = document.getElementById('indexContent');
       const shopContent = document.getElementById('shopContent');
@@ -659,6 +688,12 @@
       let musicStarted = false;
       let nullDisplayIndex = 0;
       const nullDisplayValues = ["0", "null", "-404", "-503", "[Label Missing]"];
+      
+      let cooldownSettings = {
+        enableSpecialCooldowns: true,
+        threshold: 1e35,
+        duration: 1.5
+      };
       
       let shopUpgrades = {
         variantLuck: 0,
@@ -1396,7 +1431,7 @@
       }
 
       toggleInventoryBtn.addEventListener('click', () => {
-        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection];
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection, cooldownSettingsSection];
         if (inventorySection.style.display === 'none') {
           sections.forEach(s => s.style.display = 'none');
           inventorySection.style.display = 'block';
@@ -1407,7 +1442,7 @@
       });
 
       toggleIndexBtn.addEventListener('click', () => {
-        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection];
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection, cooldownSettingsSection];
         if (indexSection.style.display === 'none') {
           sections.forEach(s => s.style.display = 'none');
           indexSection.style.display = 'block';
@@ -1418,7 +1453,7 @@
       });
 
       toggleShopBtn.addEventListener('click', () => {
-        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection];
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection, cooldownSettingsSection];
         if (shopSection.style.display === 'none') {
           sections.forEach(s => s.style.display = 'none');
           shopSection.style.display = 'block';
@@ -1429,7 +1464,7 @@
       });
 
       toggleMerchantBtn.addEventListener('click', () => {
-        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection];
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection, cooldownSettingsSection];
         if (merchantSection.style.display === 'none') {
           sections.forEach(s => s.style.display = 'none');
           merchantSection.style.display = 'block';
@@ -1440,7 +1475,7 @@
       });
 
       toggleItemInventoryBtn.addEventListener('click', () => {
-        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection];
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection, cooldownSettingsSection];
         if (itemInventorySection.style.display === 'none') {
           sections.forEach(s => s.style.display = 'none');
           itemInventorySection.style.display = 'block';
@@ -1451,7 +1486,7 @@
       });
 
       togglePVPBtn.addEventListener('click', () => {
-        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection];
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection, cooldownSettingsSection];
         if (pvpSection.style.display === 'none') {
           sections.forEach(s => s.style.display = 'none');
           pvpSection.style.display = 'block';
@@ -1478,13 +1513,24 @@
           }
         }
         
-        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection];
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection, cooldownSettingsSection];
         if (cursesSection.style.display === 'none') {
           sections.forEach(s => s.style.display = 'none');
           cursesSection.style.display = 'block';
           renderCurses();
         } else {
           cursesSection.style.display = 'none';
+        }
+      });
+
+      toggleCooldownSettingsBtn.addEventListener('click', () => {
+        const sections = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection, cooldownSettingsSection];
+        if (cooldownSettingsSection.style.display === 'none') {
+          sections.forEach(s => s.style.display = 'none');
+          cooldownSettingsSection.style.display = 'block';
+          loadCooldownSettings();
+        } else {
+          cooldownSettingsSection.style.display = 'none';
         }
       });
 
@@ -1897,6 +1943,50 @@
             isCooldown = false;
           }
         }, 100);
+      }
+
+      window.saveCooldownSettings = function() {
+        const enableCheckbox = document.getElementById('enableSpecialCooldowns');
+        const thresholdInput = document.getElementById('cooldownThreshold');
+        const durationInput = document.getElementById('cooldownDuration');
+        
+        let threshold = parseFloat(thresholdInput.value);
+        if (isNaN(threshold) || threshold < 0) {
+          alert('Invalid threshold value!');
+          return;
+        }
+        
+        let duration = parseFloat(durationInput.value);
+        if (isNaN(duration) || duration < 1 || duration > 5) {
+          alert('Duration must be between 1 and 5 seconds!');
+          return;
+        }
+        
+        cooldownSettings.enableSpecialCooldowns = enableCheckbox.checked;
+        cooldownSettings.threshold = threshold;
+        cooldownSettings.duration = duration;
+        
+        localStorage.setItem('calisRngCooldownSettings', JSON.stringify(cooldownSettings));
+        alert('Cooldown settings saved!');
+      };
+
+      function loadCooldownSettings() {
+        const saved = localStorage.getItem('calisRngCooldownSettings');
+        if (saved) {
+          try {
+            cooldownSettings = JSON.parse(saved);
+          } catch (e) {
+            cooldownSettings = {
+              enableSpecialCooldowns: true,
+              threshold: 1e35,
+              duration: 1.5
+            };
+          }
+        }
+        
+        document.getElementById('enableSpecialCooldowns').checked = cooldownSettings.enableSpecialCooldowns;
+        document.getElementById('cooldownThreshold').value = cooldownSettings.threshold;
+        document.getElementById('cooldownDuration').value = cooldownSettings.duration;
       }
 
       function getColor(value) {
@@ -2498,10 +2588,12 @@
         }
 
         let cooldown = 0;
-        if (isSpecial && !noCooldownRanks.includes(rank)) {
-          cooldown = 100;
-        } else if (absDisplayValue >= 1e35) {
-          cooldown = 1500;
+        if (!isPVP) {
+          if (isSpecial && !noCooldownRanks.includes(rank) && cooldownSettings.enableSpecialCooldowns) {
+            cooldown = cooldownSettings.duration * 1000;
+          } else if (absDisplayValue >= cooldownSettings.threshold) {
+            cooldown = cooldownSettings.duration * 1000;
+          }
         }
 
         const inventoryData = {
