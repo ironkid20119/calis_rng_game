@@ -2295,7 +2295,7 @@
         }
 
         let base = Math.pow(Math.random(), -1.9);
-        let skewed = base * finalLuck;
+        let skewed = base;
 
         skewed = Math.max(1, skewed);
         if (Math.random() < 1 / 1000) skewed = -1;
@@ -2315,7 +2315,7 @@
         }
 
         const baseValue = skewed;
-        const absBaseValue = Math.abs(baseValue);
+        const absBaseValue = Math.abs(baseValue) * finalLuck;
         originalValue = originalValue || baseValue;
 
         let secretRank = null;
