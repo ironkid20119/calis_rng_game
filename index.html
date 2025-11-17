@@ -1063,8 +1063,14 @@
           }
           
           totalRolls++;
-          const roll = rollOnce(boostMultiplier, 1, 1);
+          
+          let tempLuck = generalLuckBonus;
+          generalLuckBonus *= boostMultiplier;
+          
+          const roll = rollOnce(1, 1, 1);
           multiRolls = [roll.inventoryData];
+          
+          generalLuckBonus = tempLuck;
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, 
             `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>`);
@@ -1074,8 +1080,14 @@
           if (roll.cooldown > 0) setCooldown(roll.cooldown);
         } else if (item.type === 'specialBooster') {
           totalRolls++;
-          const roll = rollOnce(1, 1, item.multiplier);
+          
+          let tempSpecialLuck = specialLuckBonus;
+          specialLuckBonus *= item.multiplier;
+          
+          const roll = rollOnce(1, 1, 1);
           multiRolls = [roll.inventoryData];
+          
+          specialLuckBonus = tempSpecialLuck;
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, 
             `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>`);
@@ -1084,8 +1096,14 @@
           if (roll.cooldown > 0) setCooldown(roll.cooldown);
         } else if (item.type === 'variantBooster') {
           totalRolls++;
-          const roll = rollOnce(1, item.multiplier, 1);
+          
+          let tempVariantLuck = variantLuckBonus;
+          variantLuckBonus *= item.multiplier;
+          
+          const roll = rollOnce(1, 1, 1);
           multiRolls = [roll.inventoryData];
+          
+          variantLuckBonus = tempVariantLuck;
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, 
             `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>`);
