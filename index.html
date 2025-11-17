@@ -1100,6 +1100,10 @@
       }
 
       setInterval(() => {
+        nullDisplayIndex = (nullDisplayIndex + 1) % nullDisplayValues.length;
+      }, 5);
+      
+      setInterval(() => {
         merchantTimeLeft--;
         merchantTimer.textContent = merchantTimeLeft;
         
@@ -1116,9 +1120,7 @@
             yinYangState = yinYangState === 'normal' ? 'special' : 'normal';
           }
         }
-        
-        nullDisplayIndex = (nullDisplayIndex + 1) % nullDisplayValues.length;
-      }, 5);
+      }, 1000);
 
       function renderPVPUpgrades() {
         let html = '';
@@ -1280,7 +1282,7 @@
         
         isPVPCooldown = true;
         pvpRollBtn.disabled = true;
-        let remaining = 2.5;
+        let remaining = 1.0;
         const interval = setInterval(() => {
           pvpRollBtn.textContent = `Cooldown: ${remaining.toFixed(1)}s`;
           remaining -= 0.1;
