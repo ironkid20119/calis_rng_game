@@ -690,10 +690,14 @@
       const nullDisplayValues = ["0", "null", "-404", "-503", "[Label Missing]"];
       
       let cooldownSettings = {
-        enableSpecialCooldowns: true,
+        specialRanks: {},
         threshold: 1e35,
         duration: 1.5
       };
+      
+      ALL_SPECIAL_RANKS.forEach(rank => {
+        cooldownSettings.specialRanks[rank] = true;
+      });
       
       let shopUpgrades = {
         variantLuck: 0,
@@ -1058,6 +1062,9 @@
           }
         } else if (item.type === 'grandBooster') {
           totalRolls++;
+          
+          let tempLuck = luckMultiplier;
+          
           const roll = rollOnce(1000000000, 1, 1);
           multiRolls = [roll.inventoryData];
           
@@ -1946,7 +1953,6 @@
       }
 
       window.saveCooldownSettings = function() {
-        const enableCheckbox = document.getElementById('enableSpecialCooldowns');
         const thresholdInput = document.getElementById('cooldownThreshold');
         const durationInput = document.getElementById('cooldownDuration');
         
@@ -1962,7 +1968,13 @@
           return;
         }
         
-        cooldownSettings.enableSpecialCooldowns = enableCheckbox.checked;
+        ALL_SPECIAL_RANKS.forEach(rank => {
+          const checkbox = document.getElementById(`cooldown-${rank.replace(/[^a-zA-Z0-9]/g, '-')}`);
+          if (checkbox) {
+            cooldownSettings.specialRanks[rank] = checkbox.checked;
+          }
+        });
+        
         cooldownSettings.threshold = threshold;
         cooldownSettings.duration = duration;
         
@@ -1974,19 +1986,41 @@
         const saved = localStorage.getItem('calisRngCooldownSettings');
         if (saved) {
           try {
-            cooldownSettings = JSON.parse(saved);
+            const savedSettings = JSON.parse(saved);
+            cooldownSettings.threshold = savedSettings.threshold || 1e35;
+            cooldownSettings.duration = savedSettings.duration || 1.5;
+            if (savedSettings.specialRanks) {
+              Object.assign(cooldownSettings.specialRanks, savedSettings.specialRanks);
+            }
           } catch (e) {
-            cooldownSettings = {
-              enableSpecialCooldowns: true,
-              threshold: 1e35,
-              duration: 1.5
-            };
+            console.error('Failed to load cooldown settings');
           }
         }
         
-        document.getElementById('enableSpecialCooldowns').checked = cooldownSettings.enableSpecialCooldowns;
+        renderCooldownSettings();
         document.getElementById('cooldownThreshold').value = cooldownSettings.threshold;
         document.getElementById('cooldownDuration').value = cooldownSettings.duration;
+      }
+      
+      function renderCooldownSettings() {
+        const container = document.getElementById('specialRankToggles');
+        container.innerHTML = '';
+        
+        ALL_SPECIAL_RANKS.forEach(rank => {
+          const id = `cooldown-${rank.replace(/[^a-zA-Z0-9]/g, '-')}`;
+          const label = document.createElement('label');
+          label.style.display = 'block';
+          label.style.marginBottom = '5px';
+          
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.id = id;
+          checkbox.checked = cooldownSettings.specialRanks[rank] !== false;
+          
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(` ${rank}`));
+          container.appendChild(label);
+        });
       }
 
       function getColor(value) {
@@ -2108,6 +2142,8 @@
         
         luckMultiplier += blessingBonus;
         secretLuckMultiplier += blessingBonus;
+        
+        let finalLuck = luckMultiplier;
         
         let isSpecial = false;
         let noCooldownRanks = ['???UNKNOWN???', 'nil', 'Lmao'];
@@ -2258,7 +2294,7 @@
           return { result: '<span class="bold" style="color: magenta;">You rolled a/an RANKBUTTON (-1,581,532,333.00)!</span>', cooldown: 5000, inventoryData: invData };
         }
 
-        let base = Math.pow(Math.random(), -1.9);
+        let base = Math.pow(Math.random(), -1.9 / finalLuck);
         let skewed = base;
 
         skewed = Math.max(1, skewed);
@@ -2589,7 +2625,7 @@
 
         let cooldown = 0;
         if (!isPVP) {
-          if (isSpecial && !noCooldownRanks.includes(rank) && cooldownSettings.enableSpecialCooldowns) {
+          if (isSpecial && !noCooldownRanks.includes(rank) && cooldownSettings.specialRanks[rank]) {
             cooldown = cooldownSettings.duration * 1000;
           } else if (absDisplayValue >= cooldownSettings.threshold) {
             cooldown = cooldownSettings.duration * 1000;
