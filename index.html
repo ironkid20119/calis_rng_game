@@ -1063,8 +1063,6 @@
         } else if (item.type === 'grandBooster') {
           totalRolls++;
           
-          let tempLuck = luckMultiplier;
-          
           const roll = rollOnce(1000000000, 1, 1);
           multiRolls = [roll.inventoryData];
           
@@ -1106,13 +1104,8 @@
           
           totalRolls++;
           
-          let tempLuck = generalLuckBonus;
-          generalLuckBonus *= boostMultiplier;
-          
-          const roll = rollOnce(1, 1, 1);
+          const roll = rollOnce(boostMultiplier, 1, 1);
           multiRolls = [roll.inventoryData];
-          
-          generalLuckBonus = tempLuck;
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, 
             `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>`);
@@ -1123,13 +1116,8 @@
         } else if (item.type === 'specialBooster') {
           totalRolls++;
           
-          let tempSpecialLuck = specialLuckBonus;
-          specialLuckBonus *= item.multiplier;
-          
-          const roll = rollOnce(1, 1, 1);
+          const roll = rollOnce(1, 1, item.multiplier);
           multiRolls = [roll.inventoryData];
-          
-          specialLuckBonus = tempSpecialLuck;
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, 
             `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>`);
@@ -1139,13 +1127,8 @@
         } else if (item.type === 'variantBooster') {
           totalRolls++;
           
-          let tempVariantLuck = variantLuckBonus;
-          variantLuckBonus *= item.multiplier;
-          
-          const roll = rollOnce(1, 1, 1);
+          const roll = rollOnce(1, item.multiplier, 1);
           multiRolls = [roll.inventoryData];
-          
-          variantLuckBonus = tempVariantLuck;
           
           let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, 
             `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>`);
@@ -2295,7 +2278,7 @@
         }
 
         let base = Math.pow(Math.random(), -1.9);
-        let skewed = base;
+        let skewed = base * luckMultiplier;
 
         skewed = Math.max(1, skewed);
         if (Math.random() < 1 / 1000) skewed = -1;
@@ -2315,7 +2298,7 @@
         }
 
         const baseValue = skewed;
-        const absBaseValue = Math.abs(baseValue) * finalLuck;
+        const absBaseValue = Math.abs(baseValue);
         originalValue = originalValue || baseValue;
 
         let secretRank = null;
