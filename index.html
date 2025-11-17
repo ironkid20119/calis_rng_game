@@ -2294,8 +2294,8 @@
           return { result: '<span class="bold" style="color: magenta;">You rolled a/an RANKBUTTON (-1,581,532,333.00)!</span>', cooldown: 5000, inventoryData: invData };
         }
 
-        let base = Math.pow(Math.random(), -1.9 / finalLuck);
-        let skewed = base;
+        let base = Math.pow(Math.random(), -1.9);
+        let skewed = base * finalLuck;
 
         skewed = Math.max(1, skewed);
         if (Math.random() < 1 / 1000) skewed = -1;
