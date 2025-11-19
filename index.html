@@ -595,6 +595,7 @@
             Cooldown duration (seconds, 1-5):
             <input type="number" id="cooldownDuration" value="1.5" min="1" max="5" step="0.1" style="margin-left: 10px; padding: 5px; width: 100px;">
           </label>
+          <div id="specialRankToggles" style="margin-top: 15px; max-height: 300px; overflow-y: auto;"></div>
           <button onclick="saveCooldownSettings()" style="margin-top: 10px;">Save Settings</button>
         </div>
       </div>
@@ -695,6 +696,8 @@
         duration: 1.5
       };
       
+      const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>', 'UNOBTAINABLE', 'Everlasting', 'RNGod', 'Invisible', 'cali', 'RNGarbage', 'Cheesium', 'pepeCringe', 'EZ', 'The Great Special Rank With An Unnecessary Long Name, Anyways Are You Even Reading This? I Bet Not. If You Are Good Job Cuz You Wasted Time On This, Why? Anyways, Be Happy You Rolled This. Its The Rarest Special Rank. Haha I Am Making You Read This Weird Rank Name Anyways So What? Its Just A RNG Game Rank Anyways  Just Stop. You Did Too Much Reading For A Simple RNG Game Bro I Am Telling You Stop Its Just A Rank Of All Things', '100', 'NULL', '[Title Label Missing]'];
+      
       ALL_SPECIAL_RANKS.forEach(rank => {
         cooldownSettings.specialRanks[rank] = true;
       });
@@ -739,8 +742,6 @@
       let sellMode = false;
 
       const ALL_RANKS = ['nothing', 'Common', 'Natural', 'Rare', 'Unnatural', 'Epic', 'Decent', 'Mythical', 'Legendary', 'Unreal', 'Super Rare', 'Eternal', 'Starstruck', 'Paradoxical', 'Iridescent', 'Lux', 'Possible', 'RNGesus', 'CRAZY', 'Supreme', 'DAMN', 'Stupiditium', 'ASCENDED', 'Obscure', 'INFINITE', 'Divine', 'Insurmountable', 'GRAND', 'what.', 'FINALE', 'Microb', 'Attainable', 'Directional', 'Limitless', 'Endless'];
-      
-      const ALL_SPECIAL_RANKS = ['In im table ?!?!?', '???UNKNOWN???', 'leaflet', 'nil', 'NOTHINGNESS', 'INSANE', 'Lmao', 'PERFECTIONIST', 'Imaginary', 'NICE', 'FUNNY', 'Common : DIVINITY', 'Legacy FINALE', 'Catastrophic', '<(ETERNAL DAWN)>', 'UNOBTAINABLE', 'Everlasting', 'RNGod', 'Invisible', 'cali', 'RNGarbage', 'Cheesium', 'pepeCringe', 'EZ', 'The Great Special Rank With An Unnecessary Long Name, Anyways Are You Even Reading This? I Bet Not. If You Are Good Job Cuz You Wasted Time On This, Why? Anyways, Be Happy You Rolled This. Its The Rarest Special Rank. Haha I Am Making You Read This Weird Rank Name Anyways So What? Its Just A RNG Game Rank Anyways  Just Stop. You Did Too Much Reading For A Simple RNG Game Bro I Am Telling You Stop Its Just A Rank Of All Things', '100', 'NULL', '[Title Label Missing]'];
       
       const ALL_SECRET_RANKS = ['🐟', 'Destiny', '🌳', 'ULTIMATE'];
       
@@ -1642,7 +1643,7 @@
           if (caliCoins >= cost && shopUpgrades.rollBulk < maxLevel) {
             caliCoins -= cost;
             shopUpgrades.rollBulk++;
-            rollBulk = 15 + shopUpgrades.rollBulk;
+            rollBulk = 15 + shopUpgrades.rollBulk + (pvpUpgrades.bulkRoll * 10);
           }
         } else if (type === 'secretLuck') {
           cost = Math.floor(100 * Math.pow(1.01, shopUpgrades.secretLuck || 0));
@@ -1987,6 +1988,8 @@
       
       function renderCooldownSettings() {
         const container = document.getElementById('specialRankToggles');
+        if (!container) return;
+        
         container.innerHTML = '';
         
         ALL_SPECIAL_RANKS.forEach(rank => {
@@ -2668,7 +2671,7 @@
       rollSpecialLuckBtn.addEventListener('click', () => {
         if (isCooldown) return;
         if (caliCoins < 1e35) {
-          alert('Not enough coins! You need 1e50 Cali-coins.');
+          alert('Not enough coins! You need 1e35 Cali-coins.');
           return;
         }
         
@@ -2676,7 +2679,7 @@
         multiRolls = [];
         totalRolls++;
         saveAll();
-        const roll = rollOnce(10, 10, 1000000 * secretLuckBonus);
+        const roll = rollOnce(10, 10, 10000 * secretLuckBonus);
         multiRolls.push(roll.inventoryData);
         
         let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
