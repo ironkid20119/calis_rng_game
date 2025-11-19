@@ -1035,14 +1035,6 @@
             return;
           }
         } else if (item.type === 'undetermined') {
-          if (Math.random() < 1/6.66) {
-            itemInventory.splice(index, 1);
-            saveAll();
-            renderItemInventory();
-            resultsDiv.innerHTML = '<span style="color: #ef4444;">The Undetermined consumed itself!</span>';
-            return;
-          }
-          
           if (Math.random() < 1/66.66) {
             totalRolls++;
             markDiscovered('specialRanks', 'NULL');
@@ -1056,9 +1048,17 @@
             resultsDiv.innerHTML = '<span class="bold" style="color: #888;">You rolled a/an <button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">NULL</button> (' + nullDisplayValues[nullDisplayIndex] + ')!</span>';
           } else {
             resultsDiv.innerHTML = '<span style="color: yellow;">Nothing happened...</span>';
+          }
+          
+          if (Math.random() < 1/6.66) {
             itemInventory.splice(index, 1);
             saveAll();
             renderItemInventory();
+            if (resultsDiv.innerHTML === '<span style="color: yellow;">Nothing happened...</span>') {
+              resultsDiv.innerHTML += '<br><span style="color: #ef4444;">The Undetermined consumed itself!</span>';
+            } else {
+              resultsDiv.innerHTML += '<br><span style="color: #ef4444;">The Undetermined consumed itself!</span>';
+            }
             return;
           }
         } else if (item.type === 'grandBooster') {
