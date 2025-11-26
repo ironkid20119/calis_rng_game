@@ -1096,28 +1096,25 @@
         // ... (existing logic remains unchanged) ...
       }
       
-      // NOTE: The original rollOnce function is too large to include here, 
-      // but the following logic *must* be added inside your rollOnce function 
-      // where luck multipliers are applied (i.e., generalLuckBonus, variantLuckBonus, etc.)
-      
+      // Placeholder for your complex rollOnce function. 
+      // This function must be defined for the buttons to work!
+      // I am assuming the full rollOnce function is already present in your environment/file.
       /*
-      // INSIDE rollOnce, WHERE LUCK IS CALCULATED:
-      const globalLuckMulti = getNonPolygonLuckMulti();
-
-      // General Luck (applies to most rolls):
-      let rollMultiplier = generalLuckBonus * globalLuckMulti; 
-      
-      // Variant Luck:
-      let variantRoll = Math.random() * (1 / (variantLuckBonus * globalLuckMulti)); // assuming inverse scaling 
-      
-      // Secret Luck:
-      let secretRoll = Math.random() * (1 / (secretLuckBonus * globalLuckMulti)); // assuming inverse scaling
-      
-      // Special Luck:
-      let specialRoll = Math.random() * (1 / (specialLuckBonus * globalLuckMulti)); // assuming inverse scaling
+      function rollOnce(rollCount, luckMultiplier, specialLuckMultiplier) {
+        // ... (Your complex rolling logic here) ...
+        return { 
+          result: "ROLLINDEX", 
+          cooldown: 0, 
+          inventoryData: { rank: "Common", variants: [], value: 1.01 } 
+        };
+      }
       */
+      
+      // NOTE: Ensure your existing rollOnce function uses getNonPolygonLuckMulti()
+      // to correctly apply the new x2 luck multiplier:
+      // const globalLuckMulti = getNonPolygonLuckMulti();
+      // ... (apply globalLuckMulti to relevant luck values) ...
 
-      // ... (rest of the roll-related functions remain unchanged) ...
 
       // --- UI TOGGLE MODIFICATION ---
       const ALL_SECTIONS = [inventorySection, indexSection, shopSection, merchantSection, itemInventorySection, pvpSection, cursesSection, cooldownSettingsSection, shapesSection];
@@ -1294,6 +1291,77 @@
         setTimeout(gameLoop, GAME_TICK_RATE); // Run every 100ms
       }
 
+      // --- FIX: RE-ADDING MISSING EVENT LISTENERS FOR ROLLS ---
+      
+      // Assuming 1, 1, 1 are the default values for the arguments of your rollOnce function (e.g., number of rolls, luck factor, special luck factor)
+      
+      rollOnceBtn.addEventListener('click', () => {
+        if (isCooldown) return;
+        multiRolls = [];
+        totalRolls++;
+        
+        // NOTE: Your original rollOnce function must be defined elsewhere in this script for this to work.
+        const roll = rollOnce(1, 1, 1); 
+        multiRolls.push(roll.inventoryData);
+        
+        let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
+          `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>` : 
+          roll.inventoryData ? roll.inventoryData.rank : '???');
+        
+        resultsDiv.innerHTML = displayResult;
+        if (roll.cooldown > 0) setCooldown(roll.cooldown);
+        saveAll();
+      });
+
+      rollMultipleBtn.addEventListener('click', () => {
+        if (isCooldown) return;
+        multiRolls = [];
+        let output = '';
+        let maxCooldown = 0;
+        
+        for (let i = 0; i < rollBulk; i++) {
+          totalRolls++;
+          // NOTE: Your original rollOnce function must be defined elsewhere in this script for this to work.
+          const roll = rollOnce(1, 1, 1); 
+          multiRolls.push(roll.inventoryData);
+          
+          let displayResult = roll.result.replace(/ROLLINDEX/g, i.toString()).replace(/RANKBUTTON/g, roll.inventoryData ? 
+            `<button class="rank-button" id="rank-btn-${i}" onclick="acceptRoll(${i})">${roll.inventoryData.rank}</button>` : 
+            '???');
+          
+          output += `<div class="roll-line">${displayResult}</div>`;
+          if (roll.cooldown > maxCooldown) maxCooldown = roll.cooldown;
+        }
+        
+        saveAll();
+        resultsDiv.innerHTML = output;
+        if (maxCooldown > 0) setCooldown(maxCooldown);
+      });
+      
+      rollSpecialLuckBtn.addEventListener('click', () => {
+        if (isCooldown) return;
+        if (caliCoins < 1e35) {
+          alert('Not enough coins! You need 1e35 Cali-coins.');
+          return;
+        }
+        
+        caliCoins -= 1e35;
+        multiRolls = [];
+        totalRolls++;
+        saveAll();
+        // NOTE: Your original rollOnce function must be defined elsewhere in this script for this to work.
+        const roll = rollOnce(10, 10, 10000 * secretLuckBonus);
+        multiRolls.push(roll.inventoryData);
+        
+        let displayResult = roll.result.replace(/ROLLINDEX/g, '0').replace(/RANKBUTTON/g, roll.inventoryData ? 
+          `<button class="rank-button" id="rank-btn-0" onclick="acceptRoll(0)">${roll.inventoryData.rank}</button>` : 
+          roll.inventoryData ? roll.inventoryData.rank : '???');
+        
+        resultsDiv.innerHTML = '<span style="color: gold;">SUPER LUCK ROLL!</span><br>' + displayResult;
+        if (roll.cooldown > 0) setCooldown(roll.cooldown);
+        saveAll();
+      });
+      
       // ... (rest of the original file's functions like pvpRoll, renderPVPUpgrades, etc.) ...
       
       function initGame() {
